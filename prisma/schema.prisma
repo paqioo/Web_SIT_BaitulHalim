@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model MasterData {
+  id          Int      @id @default(autoincrement())
+  namaLengkap String   @default(".")
+  nimNip      String   @unique
+  role        String
+  unitSekolah String   @default("")
+  status      String   @default("Belum Aktif")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User?
+
+  @@map("master_data")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  masterDataId  Int      @unique
+  nimNip        String   @unique
+  password      String
+  fotoProfilUrl String?
+  role          String
+  unitSekolah   String
+  lastLogin     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  masterData    MasterData @relation(fields: [masterDataId], references: [id], onDelete: Cascade)
+  posts         PostBerita[]
+  galleries     Gallery[]
+  webContentUpdates WebContent[]
+
+  @@map("users")
+}
+
+model PostBerita {
+  id            Int      @id @default(autoincrement())
+  headline      String
+  content       String
+  authorId      Int
+  section       String
+  status        String   @default("Pending Review")
+  featuredImage String?
+  createdAt     DateTime @default(now())
+  publishedAt   DateTime?
+  updatedAt     DateTime @updatedAt
+
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("posts_berita")
+}
+
+model Gallery {
+  id         Int      @id @default(autoincrement())
+  judul      String
+  fotoUrl    String
+  caption    String?
+  tanggal    DateTime
+  section    String
+  uploaderId Int
+  createdAt  DateTime @default(now())
+
+  uploader   User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("gallery")
+}
+
+model WebContent {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedBy Int?
+  updatedAt DateTime @updatedAt
+
+  updater   User?    @relation(fields: [updatedBy], references: [id])
+
+  @@map("web_content")
+}
+
+model TenagaPendidik {
+  id        Int      @id @default(autoincrement())
+  fotoUrl   String?
+  nama      String
+  jabatan   String
+  deskripsi String?
+  unitId    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("tenaga_pendidik")
+}
+
+model MuridBerprestasi {
+  id        Int      @id @default(autoincrement())
+  fotoUrl   String?
+  nama      String
+  prestasi  String
+  deskripsi String?
+  unitId    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("murid_berprestasi")
+}
+
+model Fasilitas {
+  id        Int      @id @default(autoincrement())
+  fotoUrl   String?
+  judul     String
+  deskripsi String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("fasilitas")
+}
