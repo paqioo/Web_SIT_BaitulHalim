@@ -29,6 +29,28 @@ interface EditorProps {
   placeholder?: string;
 }
 
+interface ToolBtnProps {
+  active?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+function ToolBtn({ active, onClick, children }: ToolBtnProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${
+        active
+          ? "bg-[#068ec5] text-white"
+          : "text-[#64748b] hover:bg-[#068ec5]/10 hover:text-[#068ec5]"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function RichTextEditor({
   content,
   onChange,
@@ -92,28 +114,6 @@ export default function RichTextEditor({
   }, [editor]);
 
   if (!editor) return null;
-
-  const ToolBtn = ({
-    active,
-    onClick,
-    children,
-  }: {
-    active?: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${
-        active
-          ? "bg-[#068ec5] text-white"
-          : "text-[#64748b] hover:bg-[#068ec5]/10 hover:text-[#068ec5]"
-      }`}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">

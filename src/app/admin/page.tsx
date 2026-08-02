@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Shield } from "@phosphor-icons/react";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [nimNip, setNimNip] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
