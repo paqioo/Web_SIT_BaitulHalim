@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get("search") || "";
   const authorId = searchParams.get("author") || "";
 
-  const where: Record<string, unknown> = {};
+  const where: Record<string, unknown> = {
+    section: "SIT",
+  };
 
   if (authorId) {
     where.authorId = parseInt(authorId);

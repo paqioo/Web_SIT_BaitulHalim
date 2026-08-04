@@ -50,7 +50,15 @@ export async function POST(req: NextRequest) {
     data: { lastLogin: new Date() },
   });
 
-  const response = NextResponse.json({ success: true, role: user.role });
+  const response = NextResponse.json({
+    success: true,
+    userId: user.id,
+    nimNip: user.nimNip,
+    role: user.role,
+    unitSekolah: user.unitSekolah,
+    namaLengkap: masterData?.namaLengkap || "",
+    fotoProfilUrl: user.fotoProfilUrl,
+  });
   response.cookies.set("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
