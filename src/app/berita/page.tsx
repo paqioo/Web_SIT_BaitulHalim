@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -42,8 +42,7 @@ export default function BeritaPage() {
       .then(setSession);
   }, []);
 
-  useEffect(() => {
-    setLoading(true);
+  const load = useCallback(async () => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(perPage),
@@ -51,14 +50,17 @@ export default function BeritaPage() {
     });
     if (search) params.set("search", search);
 
-    fetch(`/api/berita?${params}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setItems(data.items || []);
-        setTotal(data.total || 0);
-      })
-      .finally(() => setLoading(false));
-  }, [page, sort, search]);
+    const res = await fetch(`/api/berita?${params}`);
+    const data = await res.json();
+    setItems(data.items || []);
+    setTotal(data.total || 0);
+  }, [page, sort, search, perPage]);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setLoading(true);
+    load().finally(() => setLoading(false));
+  }, [load]);
 
   const totalPages = Math.ceil(total / perPage);
 

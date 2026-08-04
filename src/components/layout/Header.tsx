@@ -40,7 +40,7 @@ export default function Header({ initialSession }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [session, setSession] = useState<UserSession | null>(initialSession);
+  const [session] = useState<UserSession | null>(initialSession);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

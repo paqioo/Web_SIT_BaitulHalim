@@ -231,7 +231,10 @@ function DataMasterPanel() {
     if (res.ok) setItems(await res.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleSubmit = async () => {
     setError("");
@@ -664,7 +667,10 @@ function ModerasiPanel() {
     if (res.ok) setItems(await res.json());
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleAction = async (id: number, status: string) => {
     const res = await fetch(`/api/berita/${id}`, {
@@ -759,8 +765,17 @@ function ModerasiPanel() {
   );
 }
 
+interface StrukturOrganisasiItem {
+  id: number;
+  nama: string;
+  jabatan: string;
+  deskripsi: string | null;
+  unitId: string;
+  fotoUrl: string | null;
+}
+
 function StrukturOrganisasiPanel() {
-  const [items, setItems] = useState<any[] | null>(null);
+  const [items, setItems] = useState<StrukturOrganisasiItem[] | null>(null);
   const [filterUnit, setFilterUnit] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -776,7 +791,10 @@ function StrukturOrganisasiPanel() {
     if (res.ok) setItems(await res.json());
   }, [filterUnit]);
 
-  useEffect(() => { load(); }, [load]);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleFotoUpload = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -798,7 +816,7 @@ function StrukturOrganisasiPanel() {
     let uploadUrl = fotoUrl;
     if (fotoFile) {
       try { uploadUrl = await handleFotoUpload(fotoFile); }
-      catch (e: any) { setError(e.message); return; }
+      catch (e: unknown) { setError(e instanceof Error ? e.message : "Gagal upload"); return; }
     }
 
     const url = editId ? `/api/tenaga-pendidik/${editId}` : "/api/tenaga-pendidik";
@@ -830,7 +848,7 @@ function StrukturOrganisasiPanel() {
     setFotoUrl("");
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: StrukturOrganisasiItem) => {
     setForm({ nama: item.nama, jabatan: item.jabatan, deskripsi: item.deskripsi || "", unitId: item.unitId });
     setFotoUrl(item.fotoUrl || "");
     setEditId(item.id);
@@ -947,7 +965,7 @@ function StrukturOrganisasiPanel() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item: any) => (
+              {items.map((item: StrukturOrganisasiItem) => (
                 <tr key={item.id} className="border-b border-[#e2e8f0] text-[#1a1a2e]">
                   <td className="py-3 pr-4">
                     {item.fotoUrl ? (

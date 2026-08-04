@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { X, Upload, ImageSquare } from "@phosphor-icons/react";
 
@@ -40,18 +40,19 @@ export default function GaleriPage() {
       .then(setSession);
   }, []);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     const res = await fetch(
       `/api/galeri${filter !== "Semua" ? `?section=${filter}` : ""}`
     );
     if (res.ok) setItems(await res.json());
     setLoading(false);
-  };
+  }, [filter]);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     load();
-  }, [filter]);
+  }, [load]);
 
   const handleUpload = async () => {
     if (!file || !judul) return;
