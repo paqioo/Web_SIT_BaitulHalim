@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabase } from "@/lib/supabase";
 import { getSession } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
@@ -31,15 +30,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "tenaga-pendidik");
-  await mkdir(uploadDir, { recursive: true });
-
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const filepath = path.join(uploadDir, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filepath, buffer);
 
-  const url = `/uploads/tenaga-pendidik/${filename}`;
+  const { data, error } = await supabase.storage
+    .from("tenaga-pendidik")
+    .upload(filename, buffer, {
+      contentType: file.type,
+    });
 
-  return NextResponse.json({ url });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const { data: publicUrl } = supabase.storage
+    .from("tenaga-pendidik")
+    .getPublicUrl(filename);
+
+  return NextResponse.json({ url: publicUrl.publicUrl });
 }

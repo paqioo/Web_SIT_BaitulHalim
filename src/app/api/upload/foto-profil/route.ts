@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabase } from "@/lib/supabase";
 import { getSession, createToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -32,15 +31,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "profil");
-  await mkdir(uploadDir, { recursive: true });
-
   const filename = `${session.userId}-${Date.now()}.${ext}`;
-  const filepath = path.join(uploadDir, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filepath, buffer);
 
-  const url = `/uploads/profil/${filename}`;
+  const { data, error } = await supabase.storage
+    .from("profil")
+    .upload(filename, buffer, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const { data: publicUrl } = supabase.storage
+    .from("profil")
+    .getPublicUrl(filename);
+
+  const url = publicUrl.publicUrl;
 
   const user = await prisma.user.update({
     where: { id: session.userId },
