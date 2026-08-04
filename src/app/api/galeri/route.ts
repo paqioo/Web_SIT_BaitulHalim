@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+);
 
 export async function GET(req: NextRequest) {
   const section = req.nextUrl.searchParams.get("section");
@@ -68,15 +72,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "galeri");
-  await mkdir(uploadDir, { recursive: true });
-
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const filepath = path.join(uploadDir, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filepath, buffer);
 
-  const fotoUrl = `/uploads/galeri/${filename}`;
+  const { data, error } = await supabase.storage
+    .from("galeri")
+    .upload(filename, buffer, { contentType: file.type });
+
+  if (error) {
+    return NextResponse.json(
+      { error: `Upload gagal: ${error.message}` },
+      { status: 500 }
+    );
+  }
+
+  const fotoUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/galeri/${data.path}`;
   const tanggal = tanggalStr ? new Date(tanggalStr) : new Date();
 
   await prisma.gallery.create({
