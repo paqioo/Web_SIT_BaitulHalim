@@ -237,7 +237,10 @@ export default function GaleriPage() {
             <Trash size={20} weight="bold" />
           </button>
           <button
-            onClick={() => setEditing(!editing)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditing(!editing);
+            }}
             className="absolute right-[4.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
             title="Edit judul & deskripsi"
             style={{ display: session && (session.role === "admin" || session.role === "guru") ? "flex" : "none" }}
