@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { X, Upload, ImageSquare } from "@phosphor-icons/react";
+import { X, Upload, ImageSquare, Trash } from "@phosphor-icons/react";
 
 interface GalleryItem {
   id: number;
@@ -33,6 +33,7 @@ export default function GaleriPage() {
   const [section, setSection] = useState("SIT");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -76,6 +77,19 @@ export default function GaleriPage() {
       load();
     }
     setUploading(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Hapus foto ini?")) return;
+    setDeleting(true);
+    const res = await fetch(`/api/galeri/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setLightbox(null);
+      load();
+    }
+    setDeleting(false);
   };
 
   const filtered =
@@ -219,6 +233,16 @@ export default function GaleriPage() {
           >
             <X size={20} weight="bold" />
           </button>
+          {session && (
+            <button
+              onClick={() => handleDelete(lightbox.id)}
+              disabled={deleting}
+              className="absolute right-6 top-20 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
+              title="Hapus foto"
+            >
+              <Trash size={20} weight="bold" />
+            </button>
+          )}
           <div
             className="max-h-[85vh] max-w-[90vw] overflow-hidden rounded-2xl bg-white p-2 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
