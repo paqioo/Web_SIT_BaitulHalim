@@ -232,7 +232,7 @@ export default function GaleriPage() {
             disabled={deleting}
             className="absolute right-[7.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
             title="Hapus foto"
-            style={{ display: session ? "flex" : "none" }}
+            style={{ display: session && (session.role === "admin" || session.role === "guru") ? "flex" : "none" }}
           >
             <Trash size={20} weight="bold" />
           </button>
@@ -240,7 +240,7 @@ export default function GaleriPage() {
             onClick={() => setEditing(!editing)}
             className="absolute right-[4.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
             title="Edit judul & deskripsi"
-            style={{ display: session ? "flex" : "none" }}
+            style={{ display: session && (session.role === "admin" || session.role === "guru") ? "flex" : "none" }}
           >
             <PencilSimple size={20} weight="bold" />
           </button>
