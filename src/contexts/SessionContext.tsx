@@ -33,8 +33,5 @@ export function SessionProvider({
 
 export function useSession() {
   const context = useContext(SessionContext);
-  if (!context) {
-    throw new Error("useSession must be used within SessionProvider");
-  }
-  return context.session;
+  return context?.session || null;
 }
