@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { X, Upload, ImageSquare, Trash } from "@phosphor-icons/react";
+import { useSession } from "@/contexts/SessionContext";
 
 interface GalleryItem {
   id: number;
@@ -13,19 +14,14 @@ interface GalleryItem {
   section: string;
 }
 
-interface Session {
-  userId: number;
-  role: string;
-}
-
 const sections = ["Semua", "SIT", "TKIT", "SDIT", "SMPIT"];
 
 export default function GaleriPage() {
+  const session = useSession();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [filter, setFilter] = useState("Semua");
   const [lightbox, setLightbox] = useState<GalleryItem | null>(null);
   const [showUpload, setShowUpload] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [judul, setJudul] = useState("");
@@ -34,12 +30,6 @@ export default function GaleriPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setSession);
-  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,7 +40,6 @@ export default function GaleriPage() {
     setLoading(false);
   }, [filter]);
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     load();
   }, [load]);

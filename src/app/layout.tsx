@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
+import { SessionProvider } from "@/contexts/SessionContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
@@ -51,9 +52,11 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body className="flex min-h-[100dvh] flex-col bg-white text-[#1a1a2e]">
-        <Header initialSession={session} />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SessionProvider session={session}>
+          <Header initialSession={session} />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   );
