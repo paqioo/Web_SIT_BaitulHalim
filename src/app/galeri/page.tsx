@@ -30,6 +30,7 @@ export default function GaleriPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
   const [editedJudul, setEditedJudul] = useState("");
   const [editedCaption, setEditedCaption] = useState("");
@@ -80,12 +81,12 @@ export default function GaleriPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Hapus foto ini?")) return;
     setDeleting(true);
     const res = await fetch(`/api/galeri/${id}`, {
       method: "DELETE",
     });
     if (res.ok) {
+      setConfirmDeleteId(null);
       setLightbox(null);
       load();
     }
@@ -286,7 +287,10 @@ export default function GaleriPage() {
           onClick={() => setLightbox(null)}
         >
           <button
-            onClick={() => handleDelete(lightbox.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmDeleteId(lightbox.id);
+            }}
             disabled={deleting}
             className="absolute right-[7.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
             title="Hapus foto"
@@ -333,6 +337,45 @@ export default function GaleriPage() {
                 <p className="mt-1 text-xs text-[#94a3b8]">{lightbox.section}</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId !== null && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setConfirmDeleteId(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+              <Trash size={26} weight="bold" className="text-red-500" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-[#1a1a2e]">
+              Apakah anda yakin ingin menghapus ini?
+            </h3>
+            <p className="mt-1 text-sm text-[#64748b]">
+              Foto akan dihapus permanen dan tidak dapat dikembalikan.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                disabled={deleting}
+                className="flex-1 rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] hover:bg-[#f1f5f9] transition-colors disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDeleteId)}
+                disabled={deleting}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Menghapus..." : "Hapus"}
+              </button>
+            </div>
           </div>
         </div>
       )}
