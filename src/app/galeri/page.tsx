@@ -221,6 +221,64 @@ export default function GaleriPage() {
         </div>
       </section>
 
+      {/* Edit Modal */}
+      {editing && lightbox && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 className="text-lg font-semibold text-[#1a1a2e] mb-4">Edit Foto</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-[#1a1a2e]">Judul</label>
+                <input
+                  type="text"
+                  value={editedJudul}
+                  onChange={(e) => setEditedJudul(e.target.value)}
+                  className="block w-full mt-1 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#068ec5]"
+                  placeholder="Masukkan judul"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#1a1a2e]">Deskripsi</label>
+                <textarea
+                  value={editedCaption}
+                  onChange={(e) => setEditedCaption(e.target.value)}
+                  rows={5}
+                  className="block w-full mt-1 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#068ec5]"
+                  placeholder="Masukkan deskripsi"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={async () => {
+                    const res = await fetch(`/api/galeri/${lightbox.id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        judul: editedJudul,
+                        caption: editedCaption,
+                      }),
+                    });
+                    if (res.ok) {
+                      setEditing(false);
+                      load();
+                    }
+                  }}
+                  className="flex-1 rounded-lg bg-[#068ec5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0577a3] transition-colors"
+                >
+                  Simpan
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="flex-1 rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] hover:bg-[#f1f5f9] transition-colors"
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lightbox */}
       {lightbox && (
         <div
@@ -263,48 +321,8 @@ export default function GaleriPage() {
               className="max-h-[70vh] w-full rounded-xl object-contain"
             />
             {editing ? (
-              <div className="px-4 py-4 space-y-3">
-                <input
-                  type="text"
-                  value={editedJudul}
-                  onChange={(e) => setEditedJudul(e.target.value)}
-                  className="block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-sm"
-                  placeholder="Judul"
-                />
-                <textarea
-                  value={editedCaption}
-                  onChange={(e) => setEditedCaption(e.target.value)}
-                  rows={3}
-                  className="block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-sm"
-                  placeholder="Caption"
-                />
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={async () => {
-                      const res = await fetch(`/api/galeri/${lightbox.id}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          judul: editedJudul,
-                          caption: editedCaption,
-                        }),
-                      });
-                      if (res.ok) {
-                        setEditing(false);
-                        load();
-                      }
-                    }}
-                    className="flex-1 rounded-xl bg-[#068ec5] px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    Simpan
-                  </button>
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="flex-1 rounded-xl border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b]"
-                  >
-                    Batal
-                  </button>
-                </div>
+              <div className="px-4 py-3">
+                <p className="text-sm text-[#94a3b8]">Edit form terbuka di atas</p>
               </div>
             ) : (
               <div className="px-4 py-3">
