@@ -1,5 +1,13 @@
 # Agent Notes
 
+## ATURAN AUTO-COMMIT (WAJIB)
+
+- **Setiap selesai membuat/fitur/merubah code apapun → LANGSUNG `git add -A && git commit -m "..." && git push` TANPA diminta.**
+- Commit message harus deskriptif (bahasa Inggris, prefix `feat:`, `fix:`, `chore:`, `docs:`).
+- Push ke GitHub agar Vercel auto-deploy.
+- Verifikasi di Vercel bahwa deployment SUDAH Ready sebelum bilang "berhasil" ke user.
+- Simpan catatan log percakapan di AGENTS.md agar ingat di sesi berikutnya.
+
 ## Deployment Setup
 
 - **Hosting:** Vercel (gratis)
@@ -19,6 +27,13 @@
 ```
 prisma generate && next build
 ```
+
+## Status (2026-08-05)
+
+- **Galeri:** upload ke Supabase Storage OK, DELETE + EDIT (PUT) sudah ada. Tombol delete/edit di lightbox pojok kanan atas (tanpa kondisi session di UI — semua user bisa klik, server yang proteksi 403).
+- **Note:** tombol delete/edit TIDAK perlu login check di UI (server-side auth). AdBlock user bisa block gambar Supabase → saran proxy `/api/image` belum diimplement.
+- Env `SUPABASE_SERVICE_ROLE_KEY` wajib ada di Vercel & lokal (build crash kalau kosong → pakai fallback dummy string di route).
+- Berita & galeri dimuat client-side (fetch `/api/...`) → skeleton loading di SSR.
 
 ## Status (2026-08-02)
 

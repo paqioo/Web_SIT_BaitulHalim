@@ -35,10 +35,6 @@ export default function GaleriPage() {
   const [editedCaption, setEditedCaption] = useState("");
 
   useEffect(() => {
-    console.log("Session in galeri page:", session);
-  }, [session]);
-
-  useEffect(() => {
     if (lightbox) {
       setEditedJudul(lightbox.judul);
       setEditedCaption(lightbox.caption || "");
