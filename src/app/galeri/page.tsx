@@ -31,6 +31,10 @@ export default function GaleriPage() {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    console.log("Session in galeri page:", session);
+  }, [session]);
+
   const load = useCallback(async () => {
     setLoading(true);
     const res = await fetch(
