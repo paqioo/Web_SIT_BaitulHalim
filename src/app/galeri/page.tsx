@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { X, Upload, ImageSquare, Trash } from "@phosphor-icons/react";
+import { X, Upload, ImageSquare, Trash, PencilSimple } from "@phosphor-icons/react";
 import { useSession } from "@/contexts/SessionContext";
 
 interface GalleryItem {
@@ -234,10 +234,17 @@ export default function GaleriPage() {
           <button
             onClick={() => handleDelete(lightbox.id)}
             disabled={deleting}
-            className="absolute right-20 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
+            className="absolute right-[7.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
             title="Hapus foto"
           >
             <Trash size={20} weight="bold" />
+          </button>
+          <button
+            onClick={() => setEditing(!editing)}
+            className="absolute right-[4.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            title="Edit judul & deskripsi"
+          >
+            <PencilSimple size={20} weight="bold" />
           </button>
           <button
             onClick={() => setLightbox(null)}
