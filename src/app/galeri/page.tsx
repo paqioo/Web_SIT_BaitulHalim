@@ -31,6 +31,7 @@ export default function GaleriPage() {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState("");
   const [editing, setEditing] = useState(false);
   const [editedJudul, setEditedJudul] = useState("");
   const [editedCaption, setEditedCaption] = useState("");
@@ -82,13 +83,22 @@ export default function GaleriPage() {
 
   const handleDelete = async (id: number) => {
     setDeleting(true);
-    const res = await fetch(`/api/galeri/${id}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
-      setConfirmDeleteId(null);
-      setLightbox(null);
-      load();
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/galeri/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        setConfirmDeleteId(null);
+        setLightbox(null);
+        load();
+      } else {
+        setDeleteError(data?.error || "Gagal menghapus foto.");
+      }
+    } catch {
+      setDeleteError("Terjadi kesalahan jaringan. Coba lagi.");
     }
     setDeleting(false);
   };
@@ -289,6 +299,7 @@ export default function GaleriPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              setDeleteError("");
               setConfirmDeleteId(lightbox.id);
             }}
             disabled={deleting}
@@ -360,6 +371,11 @@ export default function GaleriPage() {
             <p className="mt-1 text-sm text-[#64748b]">
               Foto akan dihapus permanen dan tidak dapat dikembalikan.
             </p>
+            {deleteError && (
+              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                {deleteError}
+              </p>
+            )}
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setConfirmDeleteId(null)}
