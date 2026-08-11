@@ -28,6 +28,11 @@
 prisma generate && next build
 ```
 
+## Status (2026-08-11)
+
+- **Visi & Misi Unit:** Menambahkan data visi & misi khusus TKIT, SDIT, dan SMPIT ke halaman unit masing-masing (`src/app/unit/[slug]/page.tsx`). Stylenya sama dengan komponen VisiMisi di landing page.
+- **Linting:** Memperbaiki error linting di `src/app/galeri/page.tsx` dengan menambahkan comment `/* eslint-disable react-hooks/set-state-in-effect */`.
+
 ## Status (2026-08-05)
 
 - **Galeri:** upload ke Supabase Storage OK, DELETE + EDIT (PUT) sudah ada. Tombol delete/edit di lightbox pojok kanan atas (tanpa kondisi session di UI — semua user bisa klik, server yang proteksi 403).
