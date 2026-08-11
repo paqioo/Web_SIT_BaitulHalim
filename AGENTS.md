@@ -32,6 +32,9 @@ prisma generate && next build
 
 - **Visi & Misi Unit:** Menambahkan data visi & misi khusus TKIT, SDIT, dan SMPIT ke halaman unit masing-masing (`src/app/unit/[slug]/page.tsx`). Stylenya sama dengan komponen VisiMisi di landing page.
 - **Linting:** Memperbaiki error linting di `src/app/galeri/page.tsx` dengan menambahkan comment `/* eslint-disable react-hooks/set-state-in-effect */`.
+- **Data Master:** Membagi menu Data Master menjadi 2 tab/tabel di panel dashboard admin:
+  1. **Eligibility Aktivasi**: Untuk mendaftarkan NIM/NIP mana saja yang diperbolehkan aktivasi akun.
+  2. **Akun Terdaftar**: Menampilkan nama lengkap, NIM/NIP, role, unit, password hash (dengan opsi reveal toggle), waktu login terakhir, serta aksi reset password dan hapus akun (yang mereset status eligibility-nya ke Belum Aktif).
 
 ## Status (2026-08-05)
 
