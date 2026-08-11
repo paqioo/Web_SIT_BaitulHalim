@@ -2,12 +2,50 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import VisiMisi from "@/components/landing/VisiMisi";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 const validUnits = ["tkit", "sdit", "smpit"];
+
+const defaultVisiMisi: Record<
+  string,
+  { visi: string; misi: string }
+> = {
+  tkit: {
+    visi: "Menjadi taman kanak-kanak islam rujukan dalam mewujudkan generasi Qurani yang beradab, berprestasi, peduli, cinta lingkungan, dan berwawasan global.",
+    misi: [
+      "Mengedepankan dan menanamkan aqidah Islamiyah, ibadah shohihah dan akhlakul karimah berdasarkan Al-Quran dan As-Sunnah.",
+      "Melaksanakan strategi Pembelajaran yang Aktif, Inovatif, Kreatif, Efektif, Menyenangkan Islami (PAIKEM) serta Gembira dan Berbobot.",
+      "Membentuk, melahirkan dan menghantarkan generasi mandiri yang memiliki akhlak Islami sesuai dengan potensi diri peserta didik.",
+      "Menggunakan dan memanfaatkan lingkungan sebagai media dan sumber belajar untuk menumbuh kembangkan sikap peduli dan cinta lingkungan.",
+    ].join("\n"),
+  },
+  sdit: {
+    visi: "Menjadi lembaga pendidikan dasar islam rujukan dalam mewujudkan generasi Qurani yang beradab, berprestasi, peduli, cinta lingkungan, dan berwawasan global.",
+    misi: [
+      "Mengedepankan dan menanamkan aqidah islmaiyah, ibadah shohihah, dan akhlaqul karimah berdasarkan Al-Quran dan As-Sunnah.",
+      "Melaksanakan strategi pembelajaran yang mendalam yaitu Berkesadaran, Bermakna, Membahagiakan (BBM) dan Memahami, Mengaplikasi, Merefleksi (3M).",
+      "Membentuk, melahirkan dan mengantarkan generasi mandiri yang memiliki akhlaq Islami sesuai dengan potensi diri peserta didik dan berwawasan global.",
+      "Menggunakan dan memanfaatkan lingkungan sebagai media dan sumber belajar untuk menumbuh kembangkan sikap peduli dan cinta lingkungan.",
+      "Menyelenggarakan pembelajaran yang bukan hanya fokus pada menghafal atau mengingat, tetapi melatih siswa untuk berpikir tingkat tinggi (High Order Thinking Skill/HOTS). Siswa diajak untuk menganalisis, menilai, dan memecahkan masalah (critical thinking), mampu bekerja sama dengan orang lain (collaboration), berani dan terampil dalam menyampaikan ide (communication), serta bisa melahirkan gagasan baru (creativity).",
+      "Membangun 6 kemampuan literasi dasar (literasi baca dan tulis, literasi numerasi, literasi sains, literasi digital, literasi budaya kewarganegaraan, dan literasi finansial) secara konsisten.",
+    ].join("\n"),
+  },
+  smpit: {
+    visi: "Menjadi sekolah menengah pertama rujukan dalam mewujudkan generasi Qur’ani, beradab, berprestasi, peduli, cinta lingkungan dan berwawasan global.",
+    misi: [
+      "Menyelenggarakan program pembelajaran Al-Qur'an secara intensif melalui program tahsin, tahfidz, dan pemahaman kandungan Al-Qur'an untuk membentuk generasi yang menjadikan Al-Qur'an sebagai pedoman hidup utama.",
+      "Menanamkan nilai-nilai akhlak mulia, sopan santun, dan karakter islami dalam kehidupan sehari-hari melalui pembiasaan positif (culture building) di lingkungan sekolah.",
+      "Menyelenggarakan proses pembelajaran yang inovatif, efektif, dan kompetitif guna menggali serta mengembangkan potensi akademik maupun non-akademik siswa agar mampu bersaing di tingkat nasional.",
+      "Membangun kepedulian sosial dan empati sesama melalui kegiatan kerelawanan, bakti sosial, serta aksi nyata kemanusiaan baik di lingkungan sekolah maupun masyarakat luas.",
+      "Menerapkan budaya sekolah yang bersih, sehat, dan ramah lingkungan (go-green) melalui program pengurangan sampah, penghijauan, serta pengelolaan lingkungan sekolah yang berkelanjutan.",
+      "Membekali siswa dengan kemampuan bahasa asing, pemanfaatan teknologi informasi digital yang bijak, serta pemahaman budaya lintas negara tanpa kehilangan identitas nasional dan nilai-nilai keislaman.",
+    ].join("\n"),
+  },
+};
 
 export default async function UnitPage({ params }: Props) {
   const { slug } = await params;
@@ -19,10 +57,16 @@ export default async function UnitPage({ params }: Props) {
   const unit = slug.toUpperCase() as string;
   const unitLabel = unit === "TKIT" ? "TKIT" : unit === "SDIT" ? "SDIT" : "SMPIT";
 
-  const [sambutan, pendidik, berprestasi, galeri, berita] =
+  const [sambutan, visi, misi, pendidik, berprestasi, galeri, berita] =
     await Promise.all([
       prisma.webContent.findUnique({
         where: { key: `${slug}_sambutan` },
+      }),
+      prisma.webContent.findUnique({
+        where: { key: `${slug}_visi` },
+      }),
+      prisma.webContent.findUnique({
+        where: { key: `${slug}_misi` },
       }),
       prisma.tenagaPendidik.findMany({
         where: { unitId: unit },
@@ -85,6 +129,12 @@ export default async function UnitPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Visi & Misi */}
+      <VisiMisi
+        visi={visi?.value || defaultVisiMisi[slug]?.visi}
+        misi={misi?.value || defaultVisiMisi[slug]?.misi}
+      />
 
       {/* Tenaga Pendidik */}
       {pendidik.length > 0 && (
