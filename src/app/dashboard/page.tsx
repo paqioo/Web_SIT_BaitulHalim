@@ -9,6 +9,7 @@ import {
   TrashSimple,
   Plus,
   Eye,
+  EyeSlash,
   Check,
   X,
 } from "@phosphor-icons/react";
@@ -33,6 +34,18 @@ interface MasterDataItem {
   hasAccount: boolean;
   lastLogin: string | null;
   createdAt: string;
+}
+
+interface RegisteredUserItem {
+  id: number;
+  masterDataId: number;
+  nimNip: string;
+  role: string;
+  unitSekolah: string;
+  passwordHash: string;
+  lastLogin: string | null;
+  createdAt: string;
+  namaLengkap: string;
 }
 
 interface BeritaItem {
@@ -220,21 +233,45 @@ function DashboardOverview({ session }: { session: Session }) {
 
 function DataMasterPanel() {
   const [items, setItems] = useState<MasterDataItem[] | null>(null);
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUserItem[] | null>(null);
+  const [subTab, setSubTab] = useState<"eligibility" | "registered">("eligibility");
+
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ nimNip: "", role: "guru", unitSekolah: "TKIT" });
+  
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // States for resetting password
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetUserId, setResetUserId] = useState<number | null>(null);
+  const [resetUserName, setResetUserName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
+
+  // Password visibility toggle states for bcrypt hashes
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<number, boolean>>({});
 
   const load = useCallback(async () => {
     const res = await fetch("/api/master-data");
     if (res.ok) setItems(await res.json());
   }, []);
 
+  const loadRegisteredUsers = useCallback(async () => {
+    const res = await fetch("/api/admin/users");
+    if (res.ok) setRegisteredUsers(await res.json());
+  }, []);
+
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    load();
-  }, [load]);
+    if (subTab === "eligibility") {
+      load();
+    } else {
+      loadRegisteredUsers();
+    }
+  }, [subTab, load, loadRegisteredUsers]);
 
   const handleSubmit = async () => {
     setError("");
@@ -291,21 +328,109 @@ function DataMasterPanel() {
     setSuccess("");
   };
 
+  const handleResetPasswordClick = (user: RegisteredUserItem) => {
+    setResetUserId(user.id);
+    setResetUserName(user.namaLengkap);
+    setNewPassword("");
+    setResetError("");
+    setResetSuccess("");
+    setShowResetModal(true);
+  };
+
+  const handleSaveNewPassword = async () => {
+    setResetError("");
+    setResetSuccess("");
+    if (!newPassword || newPassword.length < 6) {
+      setResetError("Password minimal 6 karakter.");
+      return;
+    }
+
+    const res = await fetch(`/api/admin/users/${resetUserId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: newPassword }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setResetError(data.error || "Gagal mereset password.");
+      return;
+    }
+
+    setResetSuccess("Password berhasil diperbarui.");
+    setTimeout(() => {
+      setShowResetModal(false);
+      loadRegisteredUsers();
+    }, 1000);
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm("Hapus akun ini? Status pendaftaran akan dikembalikan ke Belum Aktif.")) return;
+    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setSuccess("Akun berhasil dihapus.");
+      loadRegisteredUsers();
+    } else {
+      const data = await res.json();
+      setError(data.error || "Gagal menghapus akun.");
+    }
+  };
+
+  const togglePasswordReveal = (id: number) => {
+    setRevealedPasswords((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-[#1a1a2e]">Data Master</h2>
           <p className="mt-1 text-sm text-[#64748b]">
-            Kelola data eligibility untuk aktivasi akun Guru & Murid.
+            Kelola data eligibility dan akun yang sudah terdaftar.
           </p>
         </div>
+        {subTab === "eligibility" && (
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-1.5 rounded-xl bg-[#068ec5] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0577a3] self-start sm:self-auto"
+          >
+            <Plus size={16} weight="bold" />
+            Tambah Data
+          </button>
+        )}
+      </div>
+
+      {/* Tab Selector */}
+      <div className="mt-6 flex border-b border-[#e2e8f0]">
         <button
-          onClick={openAdd}
-          className="flex items-center gap-1.5 rounded-xl bg-[#068ec5] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0577a3]"
+          onClick={() => {
+            setSubTab("eligibility");
+            setError("");
+            setSuccess("");
+          }}
+          className={cn(
+            "pb-3 text-sm font-semibold border-b-2 px-4 transition-all -mb-px",
+            subTab === "eligibility"
+              ? "border-[#068ec5] text-[#068ec5]"
+              : "border-transparent text-[#64748b] hover:text-[#068ec5]"
+          )}
         >
-          <Plus size={16} weight="bold" />
-          Tambah Data
+          Eligibility Aktivasi
+        </button>
+        <button
+          onClick={() => {
+            setSubTab("registered");
+            setError("");
+            setSuccess("");
+          }}
+          className={cn(
+            "pb-3 text-sm font-semibold border-b-2 px-4 transition-all -mb-px",
+            subTab === "registered"
+              ? "border-[#068ec5] text-[#068ec5]"
+              : "border-transparent text-[#64748b] hover:text-[#068ec5]"
+          )}
+        >
+          Akun Terdaftar
         </button>
       </div>
 
@@ -316,130 +441,275 @@ function DataMasterPanel() {
         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">{success}</div>
       )}
 
-      {showForm && (
-        <div className="mt-6 rounded-xl border border-[#e2e8f0] bg-[#fafcfe] p-6">
-          <h3 className="text-base font-semibold text-[#1a1a2e]">
-            {editId ? "Edit Data" : "Tambah Data Baru"}
-          </h3>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e]">NIM/NIP</label>
-              <input
-                type="text"
-                value={form.nimNip}
-                onChange={(e) => setForm({ ...form, nimNip: e.target.value })}
-                placeholder="NIM atau NIP"
-                className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
-              />
+      {/* Eligibility Tab Content */}
+      {subTab === "eligibility" && (
+        <>
+          {showForm && (
+            <div className="mt-6 rounded-xl border border-[#e2e8f0] bg-[#fafcfe] p-6">
+              <h3 className="text-base font-semibold text-[#1a1a2e]">
+                {editId ? "Edit Data" : "Tambah Data Baru"}
+              </h3>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-sm font-medium text-[#1a1a2e]">NIM/NIP</label>
+                  <input
+                    type="text"
+                    value={form.nimNip}
+                    onChange={(e) => setForm({ ...form, nimNip: e.target.value })}
+                    placeholder="NIM atau NIP"
+                    className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#1a1a2e]">Role</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
+                  >
+                    <option value="guru">Guru</option>
+                    <option value="murid">Murid</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#1a1a2e]">Unit</label>
+                  <select
+                    value={form.unitSekolah}
+                    onChange={(e) => setForm({ ...form, unitSekolah: e.target.value })}
+                    className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
+                  >
+                    {["TKIT", "SDIT", "SMPIT"].map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={handleSubmit}
+                  className="rounded-xl bg-[#068ec5] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0577a3]"
+                >
+                  {editId ? "Simpan" : "Tambah"}
+                </button>
+                <button
+                  onClick={() => { setShowForm(false); setEditId(null); }}
+                  className="rounded-xl border border-[#e2e8f0] px-5 py-2.5 text-sm font-medium text-[#64748b] hover:bg-[#f1f5f9]"
+                >
+                  Batal
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e]">Role</label>
-              <select
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-                className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
-              >
-                <option value="guru">Guru</option>
-                <option value="murid">Murid</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e]">Unit</label>
-              <select
-                value={form.unitSekolah}
-                onChange={(e) => setForm({ ...form, unitSekolah: e.target.value })}
-                className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
-              >
-                {["TKIT", "SDIT", "SMPIT"].map((u) => (
-                  <option key={u} value={u}>{u}</option>
+          )}
+
+          <div className="mt-6 overflow-x-auto">
+            {items === null ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-xl bg-[#f1f5f9]" />
                 ))}
-              </select>
+              </div>
+            ) : items.length === 0 ? (
+              <div className="py-12 text-center text-sm text-[#64748b]">
+                Belum ada data master. Tambahkan data untuk Guru atau Murid.
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#e2e8f0] text-left text-xs font-medium uppercase tracking-wider text-[#64748b]">
+                    <th className="pb-3 pr-4">NIM/NIP</th>
+                    <th className="pb-3 pr-4">Role</th>
+                    <th className="pb-3 pr-4">Unit</th>
+                    <th className="pb-3 pr-4">Status</th>
+                    <th className="pb-3 pr-4">Akun</th>
+                    <th className="pb-3">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => (
+                    <tr key={item.id} className="border-b border-[#e2e8f0] text-[#1a1a2e]">
+                      <td className="py-3 pr-4 font-medium">{item.nimNip}</td>
+                      <td className="py-3 pr-4 capitalize">{item.role}</td>
+                      <td className="py-3 pr-4">{item.unitSekolah}</td>
+                      <td className="py-3 pr-4">
+                        <span className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[10px] font-semibold",
+                          item.status === "Aktif"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        )}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {item.hasAccount ? (
+                          <span className="text-emerald-600 text-xs">Aktif</span>
+                        ) : (
+                          <span className="text-[#94a3b8] text-xs">-</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-[#068ec5]/5 hover:text-[#068ec5]"
+                          >
+                            <PencilSimple size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-red-50 hover:text-red-500"
+                          >
+                            <TrashSimple size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Registered Users Tab Content */}
+      {subTab === "registered" && (
+        <div className="mt-6 overflow-x-auto">
+          {registeredUsers === null ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-xl bg-[#f1f5f9]" />
+              ))}
             </div>
-          </div>
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              onClick={handleSubmit}
-              className="rounded-xl bg-[#068ec5] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0577a3]"
-            >
-              {editId ? "Simpan" : "Tambah"}
-            </button>
-            <button
-              onClick={() => { setShowForm(false); setEditId(null); }}
-              className="rounded-xl border border-[#e2e8f0] px-5 py-2.5 text-sm font-medium text-[#64748b] hover:bg-[#f1f5f9]"
-            >
-              Batal
-            </button>
-          </div>
+          ) : registeredUsers.length === 0 ? (
+            <div className="py-12 text-center text-sm text-[#64748b]">
+              Belum ada akun guru atau murid yang terdaftar/aktif.
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#e2e8f0] text-left text-xs font-medium uppercase tracking-wider text-[#64748b]">
+                  <th className="pb-3 pr-4">Nama</th>
+                  <th className="pb-3 pr-4">NIM/NIP</th>
+                  <th className="pb-3 pr-4">Role</th>
+                  <th className="pb-3 pr-4">Unit</th>
+                  <th className="pb-3 pr-4">Password Hash</th>
+                  <th className="pb-3 pr-4">Terakhir Login</th>
+                  <th className="pb-3">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registeredUsers.map((user) => (
+                  <tr key={user.id} className="border-b border-[#e2e8f0] text-[#1a1a2e]">
+                    <td className="py-3 pr-4 font-semibold">{user.namaLengkap}</td>
+                    <td className="py-3 pr-4 font-medium">{user.nimNip}</td>
+                    <td className="py-3 pr-4 capitalize">{user.role}</td>
+                    <td className="py-3 pr-4">{user.unitSekolah}</td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs max-w-[120px] truncate text-[#64748b]">
+                          {revealedPasswords[user.id] ? user.passwordHash : "••••••••••••"}
+                        </span>
+                        <button
+                          onClick={() => togglePasswordReveal(user.id)}
+                          className="text-[#64748b] hover:text-[#068ec5]"
+                        >
+                          {revealedPasswords[user.id] ? (
+                            <EyeSlash size={14} />
+                          ) : (
+                            <Eye size={14} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4 text-xs text-[#64748b]">
+                      {user.lastLogin ? new Date(user.lastLogin).toLocaleString("id-ID") : "-"}
+                    </td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleResetPasswordClick(user)}
+                          title="Reset Password"
+                          className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-[#068ec5]/5 hover:text-[#068ec5]"
+                        >
+                          <PencilSimple size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          title="Hapus Akun"
+                          className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <TrashSimple size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
-      <div className="mt-6 overflow-x-auto">
-        {items === null ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded-xl bg-[#f1f5f9]" />
-            ))}
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-[#e2e8f0]">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <h3 className="text-base font-bold text-[#1a1a2e]">Reset Password</h3>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="text-[#64748b] hover:text-[#1a1a2e]"
+              >
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+            
+            <div className="mt-4">
+              <p className="text-xs text-[#64748b]">
+                Akun: <span className="font-semibold text-[#1a1a2e]">{resetUserName}</span>
+              </p>
+              
+              {resetError && (
+                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                  {resetError}
+                </div>
+              )}
+              {resetSuccess && (
+                <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-600">
+                  {resetSuccess}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <label className="block text-xs font-semibold text-[#1a1a2e]">Password Baru</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimal 6 karakter"
+                  className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="rounded-xl border border-[#e2e8f0] px-4 py-2 text-xs font-semibold text-[#64748b] hover:bg-[#f1f5f9]"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveNewPassword}
+                className="rounded-xl bg-[#068ec5] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0577a3]"
+              >
+                Simpan
+              </button>
+            </div>
           </div>
-        ) : items.length === 0 ? (
-          <div className="py-12 text-center text-sm text-[#64748b]">
-            Belum ada data master. Tambahkan data untuk Guru atau Murid.
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#e2e8f0] text-left text-xs font-medium uppercase tracking-wider text-[#64748b]">
-                <th className="pb-3 pr-4">NIM/NIP</th>
-                <th className="pb-3 pr-4">Role</th>
-                <th className="pb-3 pr-4">Unit</th>
-                <th className="pb-3 pr-4">Status</th>
-                <th className="pb-3">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="border-b border-[#e2e8f0] text-[#1a1a2e]">
-                  <td className="py-3 pr-4 font-medium">{item.nimNip}</td>
-                  <td className="py-3 pr-4 capitalize">{item.role}</td>
-                  <td className="py-3 pr-4">{item.unitSekolah}</td>
-                  <td className="py-3 pr-4">
-                    <span className={cn(
-                      "rounded-full px-2.5 py-0.5 text-[10px] font-semibold",
-                      item.status === "Aktif"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    )}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    {item.hasAccount ? (
-                      <span className="text-emerald-600 text-xs">Aktif</span>
-                    ) : (
-                      <span className="text-[#94a3b8] text-xs">-</span>
-                    )}
-                  </td>
-                  <td className="py-3">
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-[#068ec5]/5 hover:text-[#068ec5]"
-                      >
-                        <PencilSimple size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-red-50 hover:text-red-500"
-                      >
-                        <TrashSimple size={15} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
