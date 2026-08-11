@@ -847,6 +847,16 @@ function BeritaPanel({ session }: { session: Session }) {
       });
   }, [page, session]);
 
+  const handleDelete = async (id: number) => {
+    if (!confirm("Hapus berita ini?")) return;
+    const res = await fetch(`/api/berita/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setItems((prev) => (prev ? prev.filter((b) => b.id !== id) : prev));
+    } else {
+      alert("Gagal menghapus berita.");
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
       <div className="flex items-center justify-between">
@@ -899,6 +909,15 @@ function BeritaPanel({ session }: { session: Session }) {
               )}>
                 {item.status}
               </span>
+              {session.role !== "murid" && (
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  title="Hapus Berita"
+                  className="ml-2 shrink-0 rounded-lg p-1.5 text-[#64748b] transition-colors hover:bg-red-50 hover:text-red-500"
+                >
+                  <TrashSimple size={15} />
+                </button>
+              )}
             </div>
           ))}
         </div>
