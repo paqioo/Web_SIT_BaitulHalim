@@ -40,10 +40,19 @@ export default function Header({ initialSession }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [session] = useState<UserSession | null>(initialSession);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    let lastScrollY = window.scrollY;
+
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 20);
+      setHidden(currentScrollY > 80 && currentScrollY > lastScrollY);
+      lastScrollY = currentScrollY;
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -59,7 +68,8 @@ export default function Header({ initialSession }: HeaderProps) {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.05)] transition-all duration-500",
-        scrolled && "shadow-[0_2px_20px_rgba(0,0,0,0.06)]"
+        hidden && "-translate-y-full",
+        scrolled && !hidden && "shadow-[0_2px_20px_rgba(0,0,0,0.06)]"
       )}
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 lg:px-8">
