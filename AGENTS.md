@@ -109,3 +109,5 @@ Urutan langkah yang sudah dikerjakan lewat screenshot (jangan diulang):
   - File: `src/components/layout/Header.tsx`
   - Commit: `8113711 feat: add scroll hide animation to header`
   - Build: ✅ SUCCESS
+- **Prisma Config Migration**: Attempt migrate `package.json#prisma` ke `prisma.config.ts` (prep Prisma 7). Gagal karena Prisma v6 tidak support `defineConfig`. Revert ke package.json. Akan dilakukan saat upgrade ke v7 nanti.
+  - Commit: `731bfd2 chore: revert prisma config migration (v6 not supported yet)`
