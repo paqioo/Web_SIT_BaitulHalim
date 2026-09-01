@@ -1,5 +1,6 @@
 export * from "./code-block-lowlight"
 export * from "./color"
+export * from "./font-size"
 export * from "./horizontal-rule"
 export * from "./image"
 export * from "./unset-all-marks"
