@@ -143,3 +143,31 @@ Urutan langkah yang sudah dikerjakan lewat screenshot (jangan diulang):
   1. Verify Vercel deployment `bc3c9e6` status (Ready atau Building)
   2. Test image upload di editor berita — harus berhasil sekarang
   3. Monitor prod untuk runtime errors
+
+---
+
+## Session End (2026-09-01 08:32 UTC)
+
+**Completed Today:**
+- Fixed TipTap peer dependency conflicts (v3.29.x → v3.30.0)
+- Added font size dropdown (8-48px numeric values)
+- Removed unused link button
+- Created image upload function for Supabase Storage
+- Injected uploader to berita create page
+- All builds successful locally ✅
+- All commits pushed to main ✅
+
+**Awaiting:**
+- Vercel deployment `bc3c9e6` to finish (auto-deploy in progress)
+- Production test of image upload in berita editor
+
+**Files Modified:**
+- `package.json` — TipTap version alignment
+- `.npmrc` — legacy-peer-deps=true
+- `src/components/minimal-tiptap/components/section/font-size.tsx` — NEW
+- `src/components/minimal-tiptap/extensions/font-size/` — NEW
+- `src/components/minimal-tiptap/minimal-tiptap.tsx` — FontSizeSelector injected
+- `src/lib/uploadImage.ts` — NEW uploader function
+- `src/components/ui/RichTextEditor.tsx` — uploader prop added
+- `src/app/berita/buat/page.tsx` — uploader injected
+- `AGENTS.md` — status documented
