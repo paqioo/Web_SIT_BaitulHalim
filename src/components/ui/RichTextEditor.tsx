@@ -5,29 +5,30 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
-import Color from "@tiptap/extension-color";
+import { Color } from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
 import { useCallback, useState } from "react";
 import {
-  TextB,
-  TextItalic,
-  TextUnderline,
-  TextHOne,
-  TextHTwo,
-  ListBullets,
-  ListNumbers,
-  Quotes,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Strikethrough,
+  Heading1,
+  Heading2,
+  List,
+  ListOrdered,
+  Quote,
   AlignLeft,
-  AlignCenterHorizontalSimple,
+  AlignCenter,
   AlignRight,
-  LinkSimple,
-  ImageSquare,
-  TextStrikethrough,
-  PaintBrush,
-  Resize,
-} from "@phosphor-icons/react";
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Palette,
+  Type,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EditorProps {
@@ -62,13 +63,10 @@ function ToolBtn({ active, onClick, children, title }: ToolBtnProps) {
 }
 
 const fontSizeOptions = [
-  { label: "12px", value: "12px" },
-  { label: "14px", value: "14px" },
-  { label: "16px", value: "16px" },
-  { label: "18px", value: "18px" },
-  { label: "24px", value: "24px" },
-  { label: "36px", value: "36px" },
-  { label: "48px", value: "48px" },
+  { label: "Small", value: "14px" },
+  { label: "Normal", value: "16px" },
+  { label: "Large", value: "18px" },
+  { label: "Huge", value: "24px" },
 ];
 
 export default function RichTextEditor({
@@ -78,13 +76,14 @@ export default function RichTextEditor({
 }: EditorProps) {
   const [showFontSize, setShowFontSize] = useState(false);
   const [showColor, setShowColor] = useState(false);
-  const [colorPickerColor, setColorPickerColor] = useState("#000000");
+  const [showHighlight, setShowHighlight] = useState(false);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Color,
+      Highlight.configure({ multicolor: true }),
       TextStyle,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       LinkExtension.configure({ openOnClick: false }),
@@ -119,6 +118,16 @@ export default function RichTextEditor({
         editor.chain().focus().setColor(color).run();
       }
       setShowColor(false);
+    },
+    [editor]
+  );
+
+  const setHighlight = useCallback(
+    (color: string) => {
+      if (editor) {
+        editor.chain().focus().toggleHighlight({ color }).run();
+      }
+      setShowHighlight(false);
     },
     [editor]
   );
@@ -167,20 +176,21 @@ export default function RichTextEditor({
   return (
     <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
       <div className="flex flex-wrap items-center gap-1 border-b border-[#e2e8f0] bg-[#fafcfe] px-3 py-2">
-        {/* Font Size Dropdown */}
+        {/* Font Size */}
         <div className="relative">
           <ToolBtn
             active={false}
             onClick={() => {
               setShowFontSize(!showFontSize);
               setShowColor(false);
+              setShowHighlight(false);
             }}
             title="Font Size"
           >
-            <Resize size={16} weight="bold" />
+            <Type className="h-4 w-4" />
           </ToolBtn>
           {showFontSize && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-24 overflow-hidden rounded-lg border border-[#e2e8f0] bg-white py-1 shadow-lg">
+            <div className="absolute left-0 top-full z-50 mt-1 w-32 overflow-hidden rounded-lg border border-[#e2e8f0] bg-white py-1 shadow-lg">
               {fontSizeOptions.map((size) => (
                 <button
                   key={size.value}
@@ -201,87 +211,70 @@ export default function RichTextEditor({
         <ToolBtn
           active={editor.isActive("bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}
-          title="Bold (Ctrl+B)"
+          title="Bold"
         >
-          <TextB size={16} weight="bold" />
+          <Bold className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("italic")}
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          title="Italic (Ctrl+I)"
+          title="Italic"
         >
-          <TextItalic size={16} weight="bold" />
+          <Italic className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("underline")}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          title="Underline (Ctrl+U)"
+          title="Underline"
         >
-          <TextUnderline size={16} weight="bold" />
+          <UnderlineIcon className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("strike")}
           onClick={() => editor.chain().focus().toggleStrike().run()}
           title="Strikethrough"
         >
-          <TextStrikethrough size={16} weight="bold" />
+          <Strikethrough className="h-4 w-4" />
         </ToolBtn>
 
-        {/* Text Color */}
+        {/* Color & Highlight */}
         <div className="relative">
           <ToolBtn
             active={false}
             onClick={() => {
               setShowColor(!showColor);
               setShowFontSize(false);
+              setShowHighlight(false);
             }}
             title="Text Color"
           >
-            <PaintBrush size={16} weight="bold" />
+            <Palette className="h-4 w-4" />
           </ToolBtn>
           {showColor && (
             <div className="absolute left-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-lg border border-[#e2e8f0] bg-white p-2 shadow-lg">
+              <p className="mb-2 text-xs font-medium text-[#64748b]">Text Color</p>
               <div className="grid grid-cols-5 gap-1">
                 {[
                   "#000000",
-                  "#434343",
-                  "#666666",
-                  "#999999",
-                  "#b7b7b7",
-                  "#ff0000",
-                  "#ff9900",
-                  "#ffff00",
-                  "#00ff00",
-                  "#00ffff",
-                  "#0000ff",
-                  "#9900ff",
-                  "#ff00ff",
-                  "#ff6600",
-                  "#068ec5",
+                  "#dc2626",
+                  "#ea580c",
+                  "#ca8a04",
+                  "#16a34a",
+                  "#0284c7",
+                  "#9333ea",
+                  "#e11d48",
+                  "#64748b",
+                  "#f97316",
                 ].map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setColor(color)}
-                    className="h-6 w-6 rounded border border-[#e2e8f0] hover:scale-110"
+                    className="h-6 w-6 rounded border border-[#e2e8f0] transition-transform hover:scale-110"
                     style={{ backgroundColor: color }}
+                    title={color}
                   />
                 ))}
-              </div>
-              <div className="mt-2 border-t border-[#e2e8f0] pt-2">
-                <input
-                  type="color"
-                  value={colorPickerColor}
-                  onChange={(e) => setColorPickerColor(e.target.value)}
-                  className="h-8 w-full cursor-pointer rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => setColor(colorPickerColor)}
-                  className="mt-1 w-full rounded bg-[#068ec5] py-1 text-xs text-white hover:bg-[#0577a3]"
-                >
-                  Apply Custom
-                </button>
               </div>
             </div>
           )}
@@ -297,7 +290,7 @@ export default function RichTextEditor({
           }
           title="Heading 1"
         >
-          <TextHOne size={16} weight="bold" />
+          <Heading1 className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("heading", { level: 2 })}
@@ -306,7 +299,7 @@ export default function RichTextEditor({
           }
           title="Heading 2"
         >
-          <TextHTwo size={16} weight="bold" />
+          <Heading2 className="h-4 w-4" />
         </ToolBtn>
 
         <div className="mx-1 h-5 w-px bg-[#e2e8f0]" />
@@ -317,21 +310,21 @@ export default function RichTextEditor({
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           title="Bullet List"
         >
-          <ListBullets size={16} weight="bold" />
+          <List className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("orderedList")}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           title="Numbered List"
         >
-          <ListNumbers size={16} weight="bold" />
+          <ListOrdered className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive("blockquote")}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           title="Quote"
         >
-          <Quotes size={16} weight="bold" />
+          <Quote className="h-4 w-4" />
         </ToolBtn>
 
         <div className="mx-1 h-5 w-px bg-[#e2e8f0]" />
@@ -342,21 +335,21 @@ export default function RichTextEditor({
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
           title="Align Left"
         >
-          <AlignLeft size={16} weight="bold" />
+          <AlignLeft className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive({ textAlign: "center" })}
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
           title="Align Center"
         >
-          <AlignCenterHorizontalSimple size={16} weight="bold" />
+          <AlignCenter className="h-4 w-4" />
         </ToolBtn>
         <ToolBtn
           active={editor.isActive({ textAlign: "right" })}
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
           title="Align Right"
         >
-          <AlignRight size={16} weight="bold" />
+          <AlignRight className="h-4 w-4" />
         </ToolBtn>
 
         <div className="mx-1 h-5 w-px bg-[#e2e8f0]" />
@@ -367,14 +360,10 @@ export default function RichTextEditor({
           onClick={addLink}
           title="Add Link"
         >
-          <LinkSimple size={16} weight="bold" />
+          <LinkIcon className="h-4 w-4" />
         </ToolBtn>
-        <ToolBtn
-          active={false}
-          onClick={addImage}
-          title="Insert Image"
-        >
-          <ImageSquare size={16} weight="bold" />
+        <ToolBtn active={false} onClick={addImage} title="Insert Image">
+          <ImageIcon className="h-4 w-4" />
         </ToolBtn>
       </div>
       <EditorContent editor={editor} />
