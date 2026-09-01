@@ -32,7 +32,6 @@
     "@radix-ui/react-toggle-group": "^1.1.19",
     "@radix-ui/react-tooltip": "^1.2.16",
     "@supabase/supabase-js": "^2.112.0",
-    "@tiptap/extension-bubble-menu": "^3.30.0",
     "@tiptap/extension-code-block-lowlight": "^3.30.0",
     "@tiptap/extension-color": "^3.30.0",
     "@tiptap/extension-font-family": "^3.30.0",
