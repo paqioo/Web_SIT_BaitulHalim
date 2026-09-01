@@ -111,3 +111,15 @@ Urutan langkah yang sudah dikerjakan lewat screenshot (jangan diulang):
   - Build: ✅ SUCCESS
 - **Prisma Config Migration**: Attempt migrate `package.json#prisma` ke `prisma.config.ts` (prep Prisma 7). Gagal karena Prisma v6 tidak support `defineConfig`. Revert ke package.json. Akan dilakukan saat upgrade ke v7 nanti.
   - Commit: `731bfd2 chore: revert prisma config migration (v6 not supported yet)`
+- **RichTextEditor Upgrade**: Menambahkan fitur formatting advanced:
+  - Font Size selector (12px - 48px)
+  - Text Color picker (preset colors + custom color input)
+  - Strikethrough button
+  - Heading 1 button (selain H2)
+  - Image upload inline
+  - Link management with URL prompt
+  - Toolbar divider untuk grouping fitur
+  - Semua button punya tooltip title
+  - Commit: `ae00486 fix: simplify RichTextEditor - remove FontFamily extension, keep font size, color, strikethrough, H1 core features`
+  - **Issue**: FontFamily extension tidak kompatibel / tidak terload di build Vercel. Removed untuk fokus pada core features yang terbukti work (font size via TextStyle mark, color via Color extension).
+  - Build: ✅ SUCCESS (lokl), awaiting Vercel redeploy
