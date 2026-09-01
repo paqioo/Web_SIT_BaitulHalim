@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "@phosphor-icons/react";
+import { uploadImageToSupabase } from "@/lib/uploadImage";
 
 interface Session {
   userId: number;
@@ -134,6 +135,7 @@ export default function BuatPostinganPage() {
                 content={content}
                 onChange={setContent}
                 placeholder="Tulis artikel Anda di sini..."
+                uploader={uploadImageToSupabase}
               />
             </div>
 

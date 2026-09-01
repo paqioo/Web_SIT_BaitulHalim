@@ -8,12 +8,14 @@ interface RichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  uploader?: (file: File) => Promise<string>;
 }
 
 export default function RichTextEditor({
   content,
   onChange,
   placeholder = "Tulis artikel di sini...",
+  uploader,
 }: RichTextEditorProps) {
   const [value, setValue] = useState<Content>(content);
 
@@ -30,6 +32,7 @@ export default function RichTextEditor({
       onChange={handleChange}
       placeholder={placeholder}
       editorContentClassName="p-4"
+      uploader={uploader}
     />
   );
 }
