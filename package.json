@@ -13,6 +13,7 @@
     "db:push": "npx prisma db push",
     "db:seed": "npx prisma db seed"
   },
+
   "prisma": {
     "seed": "node --import tsx prisma/seed.ts"
   },
