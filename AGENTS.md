@@ -103,23 +103,43 @@ Urutan langkah yang sudah dikerjakan lewat screenshot (jangan diulang):
 
 **Blocker berikutnya**: `npx prisma db push` ke Supabase belum berhasil. Langkah berikut cek IP allowlist di Supabase → Settings → Database, atau pakai `?sslmode=require` + port 6543.
 
-## Status (2026-09-01)
+## Status (2026-09-01 — Editor Tiptap Fix)
 
-- **Header Scroll Animation**: Ditambahkan animasi hide/show header saat scroll. Header hilang saat scroll down (setelah 80px) dan muncul saat scroll up. Menggunakan state `hidden` + `-translate-y-full` transform dengan transisi smooth 500ms.
-  - File: `src/components/layout/Header.tsx`
-  - Commit: `8113711 feat: add scroll hide animation to header`
+- **TipTap Dependency Conflict**: Awalnya build Vercel gagal karena peer dependency conflict antar TipTap packages (mix v3.29.x dan v3.30.x). Fix dengan:
+  - Upgrade semua TipTap packages ke `^3.30.0` (v3.30.x hanya ada untuk code-block-lowlight, table, typography, horizontal-rule, markdown)
+  - Hapus `@tiptap/extension-bubble-menu` (tidak diimport langsung, hanya trigger peer dep conflict)
+  - Tambah `.npmrc` dengan `legacy-peer-deps=true` (bypass strict peer dependency checks)
+  - Hapus `package-lock.json` (force fresh dependency resolution)
+  - Commit: `daeb8ae fix: remove unused @tiptap/extension-bubble-menu and add .npmrc with legacy-peer-deps`
   - Build: ✅ SUCCESS
-- **Prisma Config Migration**: Attempt migrate `package.json#prisma` ke `prisma.config.ts` (prep Prisma 7). Gagal karena Prisma v6 tidak support `defineConfig`. Revert ke package.json. Akan dilakukan saat upgrade ke v7 nanti.
-  - Commit: `731bfd2 chore: revert prisma config migration (v6 not supported yet)`
-- **RichTextEditor Upgrade**: Menambahkan fitur formatting advanced:
-  - Font Size selector (12px - 48px)
-  - Text Color picker (preset colors + custom color input)
-  - Strikethrough button
-  - Heading 1 button (selain H2)
-  - Image upload inline
-  - Link management with URL prompt
-  - Toolbar divider untuk grouping fitur
-  - Semua button punya tooltip title
-  - Commit: `ae00486 fix: simplify RichTextEditor - remove FontFamily extension, keep font size, color, strikethrough, H1 core features`
-  - **Issue**: FontFamily extension tidak kompatibel / tidak terload di build Vercel. Removed untuk fokus pada core features yang terbukti work (font size via TextStyle mark, color via Color extension).
-  - Build: ✅ SUCCESS (lokl), awaiting Vercel redeploy
+
+- **Font Size Dropdown Enhancement**:
+  - Buat komponen baru `FontSizeSelector` dengan dropdown angka (8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48 px)
+  - Buat extension `FontSize` yang extend `TextStyle` untuk handle font size command (`setFontSize`, `unsetFontSize`)
+  - Inject `FontSizeSelector` ke toolbar di `minimal-tiptap.tsx` (posisi setelah heading dropdown)
+  - Commit: `93611fc feat: add font size dropdown with numeric values (8-48px), remove unused link button`
+  - Build: ✅ SUCCESS
+  - Link button dihapus karena tidak berguna
+
+- **Image Upload Fix**:
+  - Buat `uploadImageToSupabase()` function di `src/lib/uploadImage.ts` — upload ke `/api/galeri` endpoint (Supabase Storage via service role key)
+  - Update `RichTextEditor.tsx` untuk terima `uploader` prop
+  - Inject uploader ke berita create page (`src/app/berita/buat/page.tsx`)
+  - Commit: `bc3c9e6 feat: add image upload to Supabase for Tiptap editor in berita create page`
+  - Build: ✅ SUCCESS
+  - **Prerequisite**: `SUPABASE_SERVICE_ROLE_KEY` harus di-set di Vercel (sudah ada dari Aug 5)
+  - **Status**: Sedang redeploy di Vercel (build `bc3c9e6`)
+
+- **Toolbar Status**:
+  - ✅ Heading (H1-H6 dropdown) — berfungsi
+  - ✅ Font Size (angka 8-48px) — berfungsi
+  - ✅ Bold, Italic, Underline, Strikethrough — berfungsi
+  - ✅ Text Color picker (3 palette + custom) — berfungsi
+  - ✅ List (bullet, numbered, blockquote) — berfungsi
+  - ✅ Image upload (dengan Supabase Storage) — ready (awaiting Vercel deploy)
+  - ❌ Link button — dihapus (tidak berguna)
+
+- **Next Steps**:
+  1. Verify Vercel deployment `bc3c9e6` status (Ready atau Building)
+  2. Test image upload di editor berita — harus berhasil sekarang
+  3. Monitor prod untuk runtime errors
