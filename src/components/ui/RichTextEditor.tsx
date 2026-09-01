@@ -6,7 +6,6 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
-import Highlight from "@tiptap/extension-highlight";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
@@ -76,14 +75,12 @@ export default function RichTextEditor({
 }: EditorProps) {
   const [showFontSize, setShowFontSize] = useState(false);
   const [showColor, setShowColor] = useState(false);
-  const [showHighlight, setShowHighlight] = useState(false);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Color,
-      Highlight.configure({ multicolor: true }),
       TextStyle,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       LinkExtension.configure({ openOnClick: false }),
@@ -118,16 +115,6 @@ export default function RichTextEditor({
         editor.chain().focus().setColor(color).run();
       }
       setShowColor(false);
-    },
-    [editor]
-  );
-
-  const setHighlight = useCallback(
-    (color: string) => {
-      if (editor) {
-        editor.chain().focus().toggleHighlight({ color }).run();
-      }
-      setShowHighlight(false);
     },
     [editor]
   );
@@ -183,7 +170,6 @@ export default function RichTextEditor({
             onClick={() => {
               setShowFontSize(!showFontSize);
               setShowColor(false);
-              setShowHighlight(false);
             }}
             title="Font Size"
           >
@@ -237,14 +223,13 @@ export default function RichTextEditor({
           <Strikethrough className="h-4 w-4" />
         </ToolBtn>
 
-        {/* Color & Highlight */}
+        {/* Color */}
         <div className="relative">
           <ToolBtn
             active={false}
             onClick={() => {
               setShowColor(!showColor);
               setShowFontSize(false);
-              setShowHighlight(false);
             }}
             title="Text Color"
           >
