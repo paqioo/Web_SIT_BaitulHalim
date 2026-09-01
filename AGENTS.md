@@ -102,3 +102,10 @@ Urutan langkah yang sudah dikerjakan lewat screenshot (jangan diulang):
 9. **Terakhir**: user diminta menjalankan `npx prisma db push` (opsi terminal user atau dicoba agent) — BELUM dipastikan berhasil. Screenshot terakhir menunjukkan error DATABASE_URL tidak valid / koneksi
 
 **Blocker berikutnya**: `npx prisma db push` ke Supabase belum berhasil. Langkah berikut cek IP allowlist di Supabase → Settings → Database, atau pakai `?sslmode=require` + port 6543.
+
+## Status (2026-09-01)
+
+- **Header Scroll Animation**: Ditambahkan animasi hide/show header saat scroll. Header hilang saat scroll down (setelah 80px) dan muncul saat scroll up. Menggunakan state `hidden` + `-translate-y-full` transform dengan transisi smooth 500ms.
+  - File: `src/components/layout/Header.tsx`
+  - Commit: `8113711 feat: add scroll hide animation to header`
+  - Build: ✅ SUCCESS
