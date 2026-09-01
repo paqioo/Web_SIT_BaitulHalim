@@ -4,7 +4,6 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
-import FontFamily from "@tiptap/extension-font-family";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import LinkExtension from "@tiptap/extension-link";
@@ -26,7 +25,6 @@ import {
   LinkSimple,
   ImageSquare,
   TextStrikethrough,
-  TextAa,
   PaintBrush,
   Resize,
 } from "@phosphor-icons/react";
@@ -63,17 +61,6 @@ function ToolBtn({ active, onClick, children, title }: ToolBtnProps) {
   );
 }
 
-const fonts = [
-  { label: "Arial", value: "Arial, sans-serif" },
-  { label: "Helvetica", value: "Helvetica, sans-serif" },
-  { label: "Times New Roman", value: "'Times New Roman', serif" },
-  { label: "Georgia", value: "Georgia, serif" },
-  { label: "Courier New", value: "'Courier New', monospace" },
-  { label: "Verdana", value: "Verdana, sans-serif" },
-  { label: "Comic Sans MS", value: "'Comic Sans MS', cursive" },
-  { label: "Trebuchet MS", value: "'Trebuchet MS', sans-serif" },
-];
-
 const fontSizeOptions = [
   { label: "12px", value: "12px" },
   { label: "14px", value: "14px" },
@@ -89,17 +76,16 @@ export default function RichTextEditor({
   onChange,
   placeholder = "Tulis artikel di sini...",
 }: EditorProps) {
-  const [showFontFamily, setShowFontFamily] = useState(false);
   const [showFontSize, setShowFontSize] = useState(false);
   const [showColor, setShowColor] = useState(false);
   const [colorPickerColor, setColorPickerColor] = useState("#000000");
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       Color,
       TextStyle,
-      FontFamily,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       LinkExtension.configure({ openOnClick: false }),
       Image.configure({ inline: true }),
@@ -116,16 +102,6 @@ export default function RichTextEditor({
       },
     },
   });
-
-  const setFontFamily = useCallback(
-    (font: string) => {
-      if (editor) {
-        editor.chain().focus().setFontFamily(font).run();
-      }
-      setShowFontFamily(false);
-    },
-    [editor]
-  );
 
   const setFontSize = useCallback(
     (size: string) => {
@@ -191,43 +167,12 @@ export default function RichTextEditor({
   return (
     <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
       <div className="flex flex-wrap items-center gap-1 border-b border-[#e2e8f0] bg-[#fafcfe] px-3 py-2">
-        {/* Font Family Dropdown */}
-        <div className="relative">
-          <ToolBtn
-            active={false}
-            onClick={() => {
-              setShowFontFamily(!showFontFamily);
-              setShowFontSize(false);
-              setShowColor(false);
-            }}
-            title="Font Family"
-          >
-            <TextAa size={16} weight="bold" />
-          </ToolBtn>
-          {showFontFamily && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-lg border border-[#e2e8f0] bg-white py-1 shadow-lg">
-              {fonts.map((font) => (
-                <button
-                  key={font.value}
-                  type="button"
-                  onClick={() => setFontFamily(font.value)}
-                  className="block w-full px-4 py-2 text-left text-sm text-[#1a1a2e] hover:bg-[#068ec5]/10"
-                  style={{ fontFamily: font.value }}
-                >
-                  {font.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Font Size Dropdown */}
         <div className="relative">
           <ToolBtn
             active={false}
             onClick={() => {
               setShowFontSize(!showFontSize);
-              setShowFontFamily(false);
               setShowColor(false);
             }}
             title="Font Size"
@@ -288,7 +233,6 @@ export default function RichTextEditor({
             active={false}
             onClick={() => {
               setShowColor(!showColor);
-              setShowFontFamily(false);
               setShowFontSize(false);
             }}
             title="Text Color"
