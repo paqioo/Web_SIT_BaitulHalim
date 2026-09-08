@@ -211,7 +211,7 @@ export default function GaleriPage() {
               <p className="mt-4 text-sm text-[#64748b]">Belum ada foto di sini.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filtered.map((item) => (
                 <button
                   key={item.id}
@@ -236,7 +236,7 @@ export default function GaleriPage() {
       {/* Edit Modal */}
       {editing && lightbox && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold text-[#1a1a2e] mb-4">Edit Foto</h2>
             <div className="space-y-4">
               <div>
@@ -254,7 +254,7 @@ export default function GaleriPage() {
                 <textarea
                   value={editedCaption}
                   onChange={(e) => setEditedCaption(e.target.value)}
-                  rows={5}
+                  rows={4}
                   className="block w-full mt-1 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#068ec5]"
                   placeholder="Masukkan deskripsi"
                 />
@@ -275,13 +275,13 @@ export default function GaleriPage() {
                       load();
                     }
                   }}
-                  className="flex-1 rounded-lg bg-[#068ec5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0577a3] transition-colors"
+                  className="flex-1 rounded-lg bg-[#068ec5] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0577a3] transition-colors active:scale-[0.98]"
                 >
                   Simpan
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="flex-1 rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] hover:bg-[#f1f5f9] transition-colors"
+                  className="flex-1 rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] hover:bg-[#f1f5f9] transition-colors active:scale-[0.98]"
                 >
                   Batal
                 </button>
@@ -304,7 +304,7 @@ export default function GaleriPage() {
               setConfirmDeleteId(lightbox.id);
             }}
             disabled={deleting}
-            className="absolute right-[7.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
+            className="absolute top-6 right-6 sm:right-20 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-400 transition-colors hover:bg-red-500/40 disabled:opacity-50"
             title="Hapus foto"
             style={{ display: session && (session.role === "admin" || session.role === "guru") ? "flex" : "none" }}
           >
@@ -315,7 +315,7 @@ export default function GaleriPage() {
               e.stopPropagation();
               setEditing(!editing);
             }}
-            className="absolute right-[4.5rem] top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            className="absolute top-6 right-20 sm:right-32 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
             title="Edit judul & deskripsi"
             style={{ display: session && (session.role === "admin" || session.role === "guru") ? "flex" : "none" }}
           >
@@ -323,28 +323,28 @@ export default function GaleriPage() {
           </button>
           <button
             onClick={() => setLightbox(null)}
-            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            className="absolute top-6 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
           >
             <X size={20} weight="bold" />
           </button>
           <div
-            className="max-h-[85vh] max-w-[90vw] overflow-hidden rounded-2xl bg-white p-2 shadow-2xl"
+            className="w-full max-w-full max-h-[85vh] sm:max-w-[90vw] overflow-hidden rounded-2xl bg-white p-2 shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <img
               src={lightbox.fotoUrl}
               alt={lightbox.judul}
-              className="max-h-[70vh] w-full rounded-xl object-contain"
+              className="max-h-[60vh] sm:max-h-[70vh] w-full rounded-xl object-contain"
             />
             {editing ? (
-              <div className="px-4 py-3">
+              <div className="px-4 py-3 min-h-fit">
                 <p className="text-sm text-[#94a3b8]">Edit form terbuka di atas</p>
               </div>
             ) : (
-              <div className="px-4 py-3">
-                <h3 className="text-base font-semibold text-[#1a1a2e]">{lightbox.judul}</h3>
+              <div className="px-4 py-3 overflow-y-auto">
+                <h3 className="text-base font-semibold text-[#1a1a2e] break-words">{lightbox.judul}</h3>
                 {lightbox.caption && (
-                  <p className="mt-1 text-sm text-[#64748b]">{lightbox.caption}</p>
+                  <p className="mt-1 text-sm text-[#64748b] break-words">{lightbox.caption}</p>
                 )}
                 <p className="mt-1 text-xs text-[#94a3b8]">{lightbox.section}</p>
               </div>
