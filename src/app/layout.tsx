@@ -47,14 +47,14 @@ export default async function RootLayout({
     }
   }
 
-  let logoUrl: string | null = null;
+  let logoUrl: string | null = "/images/logo.svg";
   try {
     const logo = await prisma.landingImage.findFirst({
       where: { section: "logo" },
     });
-    logoUrl = logo?.imageUrl || null;
+    logoUrl = logo?.imageUrl || "/images/logo.svg";
   } catch {
-    // fallback jika tabel landing_images belum ada
+    logoUrl = "/images/logo.svg";
   }
 
   return (

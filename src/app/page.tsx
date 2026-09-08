@@ -51,7 +51,7 @@ export default async function Home() {
       content: b.content,
     }));
 
-    const heroImage = landingImages.find((i) => i.section === "hero")?.imageUrl;
+    const heroImage = landingImages.find((i) => i.section === "hero")?.imageUrl || "/images/hero-bg.jpg";
     const sambutanImages = landingImages
       .filter((i) => i.section === "sambutan")
       .map((i) => i.imageUrl);
@@ -62,7 +62,7 @@ export default async function Home() {
         <Welcome
           headline={welcomeData?.value ? "Selamat Datang" : undefined}
           text={welcomeData?.value}
-          images={sambutanImages}
+          images={sambutanImages.length > 0 ? sambutanImages : ["/images/sambutan.jpg"]}
         />
         <VisiMisi visi={visiData?.value} misi={misiData?.value} />
         <UnitSekolah />
@@ -86,11 +86,10 @@ export default async function Home() {
     );
   } catch (error) {
     console.error("Error fetching home page data:", error);
-    // Fallback jika database error (misal tabel belum ada)
     return (
       <>
-        <Hero />
-        <Welcome />
+        <Hero bgImage="/images/hero-bg.jpg" />
+        <Welcome images={["/images/sambutan.jpg"]} />
         <VisiMisi />
         <UnitSekolah />
         <Fasilitas items={[]} />
