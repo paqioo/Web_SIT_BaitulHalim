@@ -9,16 +9,22 @@ import { BeritaPreview } from "@/components/landing/BeritaPreview";
 import InstagramFeed from "@/components/landing/InstagramFeed";
 
 export default async function Home() {
+  let welcomeData: { value: string } | null = null;
+  let visiData: { value: string } | null = null;
+  let misiData: { value: string } | null = null;
+  let fasilitas: { id: number; judul: string; deskripsi: string }[] = [];
+  let galeri: { id: number; judul: string; fotoUrl: string }[] = [];
+  let berita: {
+    id: number;
+    headline: string;
+    publishedAt: Date | null;
+    author: { masterData: { namaLengkap: string } | null } | null;
+    content: string;
+  }[] = [];
+  let landingImages: { section: string; imageUrl: string }[] = [];
+
   try {
-    const [
-      welcomeData,
-      visiData,
-      misiData,
-      fasilitas,
-      galeri,
-      berita,
-      landingImages,
-    ] = await Promise.all([
+    const data = await Promise.all([
       prisma.webContent.findUnique({ where: { key: "welcome_text" } }),
       prisma.webContent.findUnique({ where: { key: "visi" } }),
       prisma.webContent.findUnique({ where: { key: "misi" } }),
@@ -41,62 +47,59 @@ export default async function Home() {
       prisma.landingImage.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
     ]);
 
-    const serializeBerita = berita.map((b) => ({
-      id: b.id,
-      headline: b.headline,
-      publishedAt: b.publishedAt?.toISOString(),
-      author: b.author
-        ? { namaLengkap: b.author?.masterData?.namaLengkap || "" }
-        : undefined,
-      content: b.content,
-    }));
-
-    const heroImage = landingImages.find((i) => i.section === "hero")?.imageUrl || "/images/hero-bg.jpg";
-    const sambutanImages = landingImages
-      .filter((i) => i.section === "sambutan")
-      .map((i) => i.imageUrl);
-
-    return (
-      <>
-        <Hero bgImage={heroImage} />
-        <Welcome
-          headline={welcomeData?.value ? "Selamat Datang" : undefined}
-          text={welcomeData?.value}
-          images={sambutanImages.length > 0 ? sambutanImages : ["/images/sambutan.jpg"]}
-        />
-        <VisiMisi visi={visiData?.value} misi={misiData?.value} />
-        <UnitSekolah />
-        <Fasilitas
-          items={fasilitas.map((f) => ({
-            id: f.id,
-            judul: f.judul,
-            deskripsi: f.deskripsi,
-          }))}
-        />
-        <GaleriPreview
-          items={galeri.map((g) => ({
-            id: g.id,
-            judul: g.judul,
-            fotoUrl: g.fotoUrl,
-          }))}
-        />
-        <BeritaPreview items={serializeBerita} />
-        <InstagramFeed />
-      </>
-    );
+    [welcomeData, visiData, misiData, fasilitas, galeri, berita, landingImages] = data;
   } catch (error) {
     console.error("Error fetching home page data:", error);
-    return (
-      <>
-        <Hero bgImage="/images/hero-bg.jpg" />
-        <Welcome images={["/images/sambutan.jpg"]} />
-        <VisiMisi />
-        <UnitSekolah />
-        <Fasilitas items={[]} />
-        <GaleriPreview items={[]} />
-        <BeritaPreview items={[]} />
-        <InstagramFeed />
-      </>
-    );
+    welcomeData = null;
+    visiData = null;
+    misiData = null;
+    fasilitas = [];
+    galeri = [];
+    berita = [];
+    landingImages = [];
   }
+
+  const serializeBerita = berita.map((b) => ({
+    id: b.id,
+    headline: b.headline,
+    publishedAt: b.publishedAt?.toISOString(),
+    author: b.author
+      ? { namaLengkap: b.author?.masterData?.namaLengkap || "" }
+      : undefined,
+    content: b.content,
+  }));
+
+  const heroImage = landingImages.find((i) => i.section === "hero")?.imageUrl || "/images/hero-bg.jpg";
+  const sambutanImages = landingImages
+    .filter((i) => i.section === "sambutan")
+    .map((i) => i.imageUrl);
+
+  return (
+    <>
+      <Hero bgImage={heroImage} />
+      <Welcome
+        headline={welcomeData?.value ? "Selamat Datang" : undefined}
+        text={welcomeData?.value}
+        images={sambutanImages.length > 0 ? sambutanImages : ["/images/sambutan.jpg"]}
+      />
+      <VisiMisi visi={visiData?.value} misi={misiData?.value} />
+      <UnitSekolah />
+      <Fasilitas
+        items={fasilitas.map((f) => ({
+          id: f.id,
+          judul: f.judul,
+          deskripsi: f.deskripsi,
+        }))}
+      />
+      <GaleriPreview
+        items={galeri.map((g) => ({
+          id: g.id,
+          judul: g.judul,
+          fotoUrl: g.fotoUrl,
+        }))}
+      />
+      <BeritaPreview items={serializeBerita} />
+      <InstagramFeed />
+    </>
+  );
 }

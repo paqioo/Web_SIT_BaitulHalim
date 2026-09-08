@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
 
   const where = section ? { section } : {};
 
+  // Fetch gallery items
   const items = await prisma.gallery.findMany({
     where,
     orderBy: { createdAt: "desc" },
@@ -26,12 +27,102 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json(
-    items.map((i) => ({
-      ...i,
-      tanggal: i.tanggal.toISOString(),
-    }))
-  );
+  const formattedItems = items.map((i) => ({
+    ...i,
+    tanggal: i.tanggal.toISOString(),
+    isFromBerita: false,
+  }));
+
+  // Fetch published news with images to include in gallery
+  const beritaWhere = {
+    status: "Published",
+    ...(section ? { section } : {}),
+  };
+
+  const beritaPosts = await prisma.postBerita.findMany({
+    where: beritaWhere,
+    orderBy: { publishedAt: "desc" },
+    select: {
+      id: true,
+      headline: true,
+      content: true,
+      featuredImage: true,
+      publishedAt: true,
+      createdAt: true,
+      section: true,
+    },
+  });
+
+  // Extract images from featuredImage and HTML content
+  const beritaItems: Array<{
+    id: number;
+    judul: string;
+    fotoUrl: string;
+    caption: string | null;
+    tanggal: string;
+    section: string;
+    isFromBerita: boolean;
+  }> = [];
+
+  const imgRegex = /<img[^>]+src=["']([^"']+)["']/g;
+
+  for (const b of beritaPosts) {
+    const images: string[] = [];
+    if (b.featuredImage) {
+      images.push(b.featuredImage);
+    }
+
+    let match;
+    while ((match = imgRegex.exec(b.content)) !== null) {
+      if (match[1] && !images.includes(match[1])) {
+        images.push(match[1]);
+      }
+    }
+
+    images.forEach((imgUrl, idx) => {
+      beritaItems.push({
+        id: -(b.id * 100 + idx + 1), // negative ID to avoid key collision
+        judul: b.headline,
+        fotoUrl: imgUrl,
+        caption: `Foto dari Berita: ${b.headline}`,
+        tanggal: (b.publishedAt || b.createdAt).toISOString(),
+        section: b.section || "SIT",
+        isFromBerita: true,
+      });
+    });
+  }
+
+  const result = [...formattedItems, ...beritaItems];
+
+  // Fallback defaults if still empty
+  if (result.length === 0) {
+    const defaultFallback = [
+      {
+        id: -1,
+        judul: "Musholla Baitul Halim",
+        fotoUrl: "/images/hero-bg.jpg",
+        caption: "Fasilitas Ibadah Musholla Baitul Halim",
+        tanggal: new Date().toISOString(),
+        section: "SIT",
+        isFromBerita: true,
+      },
+      {
+        id: -2,
+        judul: "Gedung Utama SIT Baitul Halim",
+        fotoUrl: "/images/sambutan.jpg",
+        caption: "Gedung Sekolah SIT Baitul Halim",
+        tanggal: new Date().toISOString(),
+        section: "SIT",
+        isFromBerita: true,
+      },
+    ];
+
+    if (!section || section === "Semua" || section === "SIT") {
+      return NextResponse.json(defaultFallback);
+    }
+  }
+
+  return NextResponse.json(result);
 }
 
 export async function POST(req: NextRequest) {
