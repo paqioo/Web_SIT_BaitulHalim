@@ -28,6 +28,54 @@
 prisma generate && next build
 ```
 
+## Status (2026-09-08 — Landing Images & Logo Management)
+
+**Completed:**
+- ✅ Prisma schema: tambah model `LandingImage` (section, imageUrl, sortOrder)
+- ✅ API route `/api/landing-images` (GET, POST, DELETE) — upload ke Supabase Storage bucket "galeri"
+- ✅ Hero.tsx: update dengan `bgImage` prop + overlay gradient, fallback ke blue gradient jika no image
+- ✅ Welcome.tsx: auto-slider dengan indicator dots (5 detik interval), support multiple images
+- ✅ Header.tsx & Footer.tsx: logo dari DB atau fallback ke `/images/logo.svg`
+- ✅ layout.tsx: fetch logo dari DB, pass ke Header & Footer
+- ✅ Dashboard: tambah tab "Gambar Landing" (admin + guru) dengan upload form + preview grid
+- ✅ GambarLandingPanel: upload by section (hero, sambutan, logo), delete dengan konfirmasi
+- ✅ Build local: SUCCESS (9.6s compile, TypeScript OK)
+- ✅ Git commit: `f10487d feat: add landing image management system...`
+- ✅ Git push: to origin/main SUCCESS
+
+**Sistem Kerja:**
+- Hero background: 1 gambar di section "hero" (replace/upsert)
+- Sambutan slider: multiple gambar di section "sambutan" (append)
+- Logo: 1 gambar di section "logo" (replace/upsert)
+- Auto-slide interval: 5 detik (settable di Welcome.tsx line `5000`)
+- Dots indicator: click untuk switch slide manual
+- Responsive: object-cover, aspect-video untuk preview
+
+**Next Steps:**
+1. Vercel deployment: tunggu auto-deploy commit `f10487d` (check https://vercel.com/dashboard)
+2. Run `npx prisma db push` di production (Vercel akan auto-run saat redeploy)
+3. Upload gambar melalui admin dashboard tab "Gambar Landing"
+4. Test hero background, sambutan slider, logo di production
+
+**Files Modified:**
+- `prisma/schema.prisma` — model `LandingImage`
+- `src/app/api/landing-images/route.ts` — NEW (GET, POST)
+- `src/app/api/landing-images/[id]/route.ts` — NEW (DELETE)
+- `src/components/landing/Hero.tsx` — bgImage prop + overlay
+- `src/components/landing/Welcome.tsx` — slider + dots
+- `src/app/layout.tsx` — fetch logo, pass to Header/Footer
+- `src/components/layout/Header.tsx` — logo image component
+- `src/components/layout/Footer.tsx` — logo image + kontak baru (021) 8826 801, +62 857-1625-2339, Jl. Karya Logam Rt.03/Rw.05
+- `src/app/page.tsx` — pass hero/sambutan images to components
+- `src/app/dashboard/page.tsx` — tab "Gambar Landing", GambarLandingPanel component
+- `public/images/logo.svg` — NEW (fallback logo, yellow + black diamond with house icon)
+
+**Lint Status:**
+- 9 errors di TipTap components (pre-existing, bukan dari perubahan ini)
+- 20 warnings (mostly `<img>` → `next/image`, OK untuk sekarang)
+
+---
+
 ## Status (2026-08-11)
 
 - **Visi & Misi Unit:** Menambahkan data visi & misi khusus TKIT, SDIT, dan SMPIT ke halaman unit masing-masing (`src/app/unit/[slug]/page.tsx`). Stylenya sama dengan komponen VisiMisi di landing page.
