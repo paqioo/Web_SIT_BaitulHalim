@@ -33,15 +33,13 @@ prisma generate && next build
 **Completed:**
 - ✅ Prisma schema: tambah model `LandingImage` (section, imageUrl, sortOrder)
 - ✅ API route `/api/landing-images` (GET, POST, DELETE) — upload ke Supabase Storage bucket "galeri"
-- ✅ Hero.tsx: update dengan `bgImage` prop + overlay gradient, fallback ke blue gradient jika no image
-- ✅ Welcome.tsx: auto-slider dengan indicator dots (5 detik interval), support multiple images
+- ✅ Hero.tsx: update dengan `bgImage` prop + overlay gradient, default fallback ke `/images/hero-bg.jpg` (gambar Musholla)
+- ✅ Welcome.tsx: auto-slider dengan indicator dots (5 detik interval), default fallback ke `/images/sambutan.jpg` (gambar Gedung Sekolah)
 - ✅ Header.tsx & Footer.tsx: logo dari DB atau fallback ke `/images/logo.svg`
-- ✅ layout.tsx: fetch logo dari DB, pass ke Header & Footer
+- ✅ layout.tsx & page.tsx: try/catch error handling & fallback gambar bawaan
 - ✅ Dashboard: tambah tab "Gambar Landing" (admin + guru) dengan upload form + preview grid
-- ✅ GambarLandingPanel: upload by section (hero, sambutan, logo), delete dengan konfirmasi
-- ✅ Build local: SUCCESS (9.6s compile, TypeScript OK)
-- ✅ Git commit: `f10487d feat: add landing image management system...`
-- ✅ Git push: to origin/main SUCCESS
+- ✅ Build local: SUCCESS (11.5s compile, TypeScript OK)
+- ✅ Git commit & push: `00e65b1 fix: set default hero, sambutan, and logo images with fallback handling`
 
 **Sistem Kerja:**
 - Hero background: 1 gambar di section "hero" (replace/upsert)
