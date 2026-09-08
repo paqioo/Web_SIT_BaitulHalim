@@ -16,6 +16,7 @@ interface UserSession {
 
 interface HeaderProps {
   initialSession: UserSession | null;
+  logo?: string | null;
 }
 
 const navItems = [
@@ -35,7 +36,7 @@ const navItems = [
   { label: "Hubungi Kami", href: "/#footer" },
 ];
 
-export default function Header({ initialSession }: HeaderProps) {
+export default function Header({ initialSession, logo }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -74,9 +75,11 @@ export default function Header({ initialSession }: HeaderProps) {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#068ec5] text-white font-bold text-sm">
-            SIT
-          </div>
+          {logo ? (
+            <img src={logo} alt="SIT Baitul Halim" className="h-10 w-auto object-contain" />
+          ) : (
+            <img src="/images/logo.svg" alt="SIT Baitul Halim" className="h-10 w-auto object-contain" />
+          )}
           <span className="hidden text-lg font-semibold tracking-tight text-[#1a1a2e] sm:block">
             SIT Baitul Halim
           </span>

@@ -1,11 +1,28 @@
-import { BookOpen, GraduationCap, Users } from "@phosphor-icons/react/dist/ssr";
+"use client";
+
+import { useEffect, useState } from "react";
+import { GraduationCap, Users } from "@phosphor-icons/react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface WelcomeProps {
   headline?: string;
   text?: string;
+  images?: string[];
 }
 
-export default function Welcome({ headline, text }: WelcomeProps) {
+export default function Welcome({ headline, text, images }: WelcomeProps) {
+  const validImages = Array.isArray(images) ? images.filter(Boolean) : [];
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % validImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [validImages.length]);
+
   return (
     <section id="about" className="py-24 bg-white">
       <div className="mx-auto max-w-[1400px] px-6 lg:px-8">
@@ -42,10 +59,57 @@ export default function Welcome({ headline, text }: WelcomeProps) {
               </div>
             </div>
           </div>
+
           <div className="relative">
-            <div className="aspect-[4/3] w-full rounded-2xl bg-[#068ec5]/5 border border-[#e2e8f0] overflow-hidden flex items-center justify-center text-[#068ec5] text-5xl">
-              <BookOpen size={64} weight="light" />
+            <div className="aspect-[4/3] w-full rounded-2xl bg-[#068ec5]/5 border border-[#e2e8f0] overflow-hidden">
+              {validImages.length > 0 ? (
+                validImages.map((src, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "absolute inset-0 transition-opacity duration-700",
+                      i === current ? "opacity-100" : "opacity-0"
+                    )}
+                  >
+                    <Image
+                      src={src}
+                      alt={`Sambutan ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="flex h-full items-center justify-center text-[#068ec5] text-5xl">
+                  <Image
+                    src="/images/logo.svg"
+                    alt="SIT Baitul Halim"
+                    width={120}
+                    height={100}
+                    className="opacity-40"
+                  />
+                </div>
+              )}
             </div>
+
+            {validImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
+                {validImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrent(i)}
+                    aria-label={`Slide ${i + 1}`}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      i === current
+                        ? "w-6 bg-[#068ec5]"
+                        : "w-2 bg-white/70 hover:bg-white"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

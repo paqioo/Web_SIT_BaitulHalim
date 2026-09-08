@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
 import { SessionProvider } from "@/contexts/SessionContext";
 import Header from "@/components/layout/Header";
@@ -46,6 +47,10 @@ export default async function RootLayout({
     }
   }
 
+  const logo = await prisma.landingImage.findFirst({
+    where: { section: "logo" },
+  });
+
   return (
     <html
       lang="id"
@@ -53,9 +58,9 @@ export default async function RootLayout({
     >
       <body className="flex min-h-[100dvh] flex-col bg-white text-[#1a1a2e]">
         <SessionProvider session={session}>
-          <Header initialSession={session} />
+          <Header initialSession={session} logo={logo?.imageUrl} />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <Footer logo={logo?.imageUrl} />
         </SessionProvider>
       </body>
     </html>

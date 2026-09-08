@@ -100,6 +100,7 @@ export default function DashboardPage() {
     { key: "dashboard", label: "Dashboard", roles: ["admin", "guru", "murid"] },
     { key: "data-master", label: "Data Master", roles: ["admin"] },
     { key: "struktur", label: "Struktur Organisasi", roles: ["admin", "guru"] },
+    { key: "gambar-landing", label: "Gambar Landing", roles: ["admin", "guru"] },
     { key: "web-content", label: "Konten Web", roles: ["admin", "guru"] },
     { key: "berita", label: "Berita", roles: ["admin", "guru", "murid"] },
     { key: "moderasi", label: "Moderasi", roles: ["admin", "guru"] },
@@ -166,6 +167,7 @@ export default function DashboardPage() {
             {tab === "dashboard" && <DashboardOverview session={session} />}
             {tab === "data-master" && session.role === "admin" && <DataMasterPanel />}
             {tab === "struktur" && (session.role === "admin" || session.role === "guru") && <StrukturOrganisasiPanel />}
+            {tab === "gambar-landing" && (session.role === "admin" || session.role === "guru") && <GambarLandingPanel />}
             {tab === "web-content" && (session.role === "admin" || session.role === "guru") && <WebContentPanel />}
             {tab === "berita" && <BeritaPanel session={session} />}
             {tab === "moderasi" && (session.role === "admin" || session.role === "guru") && <ModerasiPanel />}
@@ -1363,6 +1365,152 @@ function ProfilPanel({
         >
           {uploading ? "..." : "Simpan"}
         </button>
+      </div>
+    </div>
+  );
+}
+
+function GambarLandingPanel() {
+  const [images, setImages] = useState<Array<{ id: number; section: string; imageUrl: string }> | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [section, setSection] = useState("hero");
+  const [uploading, setUploading] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const sections = [
+    { value: "hero", label: "Hero Background" },
+    { value: "sambutan", label: "Sambutan (Slider)" },
+    { value: "logo", label: "Logo" },
+  ];
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/landing-images");
+    if (res.ok) setImages(await res.json());
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setUploading(true);
+    setMsg("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("section", section);
+
+    const res = await fetch("/api/landing-images", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.ok) {
+      setMsg("Gambar berhasil diupload.");
+      setFile(null);
+      load();
+    } else {
+      const data = await res.json();
+      setMsg(data.error || "Gagal upload.");
+    }
+    setUploading(false);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Hapus gambar ini?")) return;
+    const res = await fetch(`/api/landing-images/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setMsg("Gambar berhasil dihapus.");
+      load();
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
+      <h2 className="text-xl font-bold tracking-tight text-[#1a1a2e]">Gambar Landing</h2>
+      <p className="mt-1 text-sm text-[#64748b]">Kelola gambar hero, sambutan, dan logo.</p>
+
+      {msg && (
+        <div
+          className={cn(
+            "mt-4 rounded-xl border px-4 py-3 text-sm",
+            msg.includes("berhasil") ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-red-200 bg-red-50 text-red-600"
+          )}
+        >
+          {msg}
+        </div>
+      )}
+
+      <div className="mt-6 rounded-xl border border-[#e2e8f0] bg-[#fafcfe] p-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-[#1a1a2e]">Bagian</label>
+            <select
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              className="mt-1.5 block w-full rounded-xl border border-[#e2e8f0] bg-white px-4 py-3 text-sm focus:border-[#068ec5] focus:outline-none focus:ring-2 focus:ring-[#068ec5]/20"
+            >
+              {sections.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1a1a2e]">File Gambar</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="mt-1.5 block w-full text-sm text-[#64748b] file:mr-4 file:rounded-xl file:border-0 file:bg-[#068ec5]/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#068ec5]"
+            />
+          </div>
+        </div>
+        <button
+          onClick={handleUpload}
+          disabled={!file || uploading}
+          className="mt-4 rounded-xl bg-[#068ec5] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0577a3] disabled:opacity-50"
+        >
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-sm font-semibold text-[#1a1a2e]">Gambar Tersimpan</h3>
+        {images === null ? (
+          <div className="mt-3 space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-24 animate-pulse rounded-xl bg-[#f1f5f9]" />
+            ))}
+          </div>
+        ) : images.length === 0 ? (
+          <p className="mt-3 text-sm text-[#64748b]">Belum ada gambar yang diupload.</p>
+        ) : (
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {images.map((img) => (
+              <div key={img.id} className="rounded-xl border border-[#e2e8f0] overflow-hidden bg-[#f1f5f9]">
+                <div className="relative aspect-video w-full">
+                  <img
+                    src={img.imageUrl}
+                    alt={img.section}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <p className="text-xs font-medium text-[#64748b]">{img.section.toUpperCase()}</p>
+                  <button
+                    onClick={() => handleDelete(img.id)}
+                    className="mt-2 w-full rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

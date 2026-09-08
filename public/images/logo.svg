@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 420" fill="none">
+  <!-- Diamond Background -->
+  <polygon points="250,20 480,180 250,340 20,180" fill="#1e1e24" rx="16" />
+  
+  <!-- Outer Yellow Border -->
+  <polygon points="250,28 468,180 250,332 32,180" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linejoin="round" />
+  
+  <!-- Architectural roof lines -->
+  <path d="M 90,165 L 250,45 L 410,165" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 230,165 L 230,55" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round" />
+  <path d="M 245,165 L 245,68 L 390,165" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- House base box -->
+  <path d="M 130,140 L 130,225 L 395,225 L 395,170" fill="none" stroke="#facc15" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Circles inside box -->
+  <circle cx="160" cy="188" r="16" stroke="#facc15" stroke-width="6" fill="none" />
+  <path d="M 150,193 Q 160,201 170,193" stroke="#facc15" stroke-width="4" fill="none" stroke-linecap="round" />
+  <circle cx="205" cy="188" r="16" stroke="#facc15" stroke-width="6" fill="none" />
+  <path d="M 195,193 Q 205,201 215,193" stroke="#facc15" stroke-width="4" fill="none" stroke-linecap="round" />
+  
+  <!-- Circles below box -->
+  <circle cx="220" cy="265" r="15" stroke="#facc15" stroke-width="5.5" fill="none" />
+  <path d="M 211,270 Q 220,277 229,270" stroke="#facc15" stroke-width="3.5" fill="none" stroke-linecap="round" />
+  
+  <circle cx="260" cy="265" r="15" stroke="#facc15" stroke-width="5.5" fill="none" />
+  <path d="M 251,270 Q 260,277 269,270" stroke="#facc15" stroke-width="3.5" fill="none" stroke-linecap="round" />
+  
+  <circle cx="300" cy="265" r="15" stroke="#facc15" stroke-width="5.5" fill="none" />
+  <path d="M 291,270 Q 300,277 309,270" stroke="#facc15" stroke-width="3.5" fill="none" stroke-linecap="round" />
+  
+  <!-- Baitul Halim Typography Stylized -->
+  <g transform="translate(250, 385)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-weight="900" font-size="34" fill="#000" stroke="#000" stroke-width="8" stroke-linejoin="round" letter-spacing="2">Baitul Halim</text>
+    <text x="0" y="0" text-anchor="middle" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-weight="900" font-size="34" fill="#facc15" stroke="#ca8a04" stroke-width="1.5" letter-spacing="2">Baitul Halim</text>
+  </g>
+</svg>

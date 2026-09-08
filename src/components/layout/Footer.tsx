@@ -18,16 +18,22 @@ const quickLinks = [
   { label: "Berita", href: "/berita" },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  logo?: string | null;
+}
+
+export default function Footer({ logo }: FooterProps) {
   return (
     <footer id="footer" className="border-t border-[#e2e8f0] bg-[#fafcfe]">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#068ec5] text-white font-bold text-sm">
-                SIT
-              </div>
+              {logo ? (
+                <img src={logo} alt="SIT Baitul Halim" className="h-10 w-auto object-contain" />
+              ) : (
+                <img src="/images/logo.svg" alt="SIT Baitul Halim" className="h-10 w-auto object-contain" />
+              )}
               <span className="text-lg font-semibold tracking-tight text-[#1a1a2e]">
                 SIT Baitul Halim
               </span>
@@ -82,11 +88,11 @@ export default function Footer() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-2.5">
                 <Phone size={16} className="mt-0.5 shrink-0 text-[#068ec5]" />
-                <span className="text-sm text-[#64748b]">(021) 123-4567</span>
+                <span className="text-sm text-[#64748b]">(021) 8826 801</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <WhatsappLogo size={16} className="mt-0.5 shrink-0 text-[#068ec5]" />
-                <span className="text-sm text-[#64748b]">+62 812-3456-7890</span>
+                <span className="text-sm text-[#64748b]">+62 857-1625-2339</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <EnvelopeSimple size={16} className="mt-0.5 shrink-0 text-[#068ec5]" />
@@ -95,7 +101,7 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="mt-0.5 shrink-0 text-[#068ec5]" />
                 <span className="text-sm text-[#64748b]">
-                  Jl. Pendidikan No. 1, Jakarta
+                  Jl. Karya Logam Rt.03/Rw.05, Jatimulya, Kec. Tambun Selatan
                 </span>
               </li>
             </ul>
@@ -106,11 +112,9 @@ export default function Footer() {
               Alamat
             </h4>
             <p className="mt-4 text-sm leading-relaxed text-[#64748b]">
-              Jl. Pendidikan No. 1,
+              Jl. Karya Logam Rt.03/Rw.05,
               <br />
-              Kelurahan Cakung,
-              <br />
-              Jakarta Timur, 13910
+              Jatimulya, Kec. Tambun Selatan
             </p>
             <div className="mt-6 flex flex-col gap-2">
               <Link

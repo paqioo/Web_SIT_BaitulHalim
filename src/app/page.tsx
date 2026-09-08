@@ -9,28 +9,36 @@ import { BeritaPreview } from "@/components/landing/BeritaPreview";
 import InstagramFeed from "@/components/landing/InstagramFeed";
 
 export default async function Home() {
-  const [welcomeData, visiData, misiData, fasilitas, galeri, berita] =
-    await Promise.all([
-      prisma.webContent.findUnique({ where: { key: "welcome_text" } }),
-      prisma.webContent.findUnique({ where: { key: "visi" } }),
-      prisma.webContent.findUnique({ where: { key: "misi" } }),
-      prisma.fasilitas.findMany({ orderBy: { sortOrder: "asc" } }),
-      prisma.gallery.findMany({
-        take: 8,
-        orderBy: { createdAt: "desc" },
-        select: { id: true, judul: true, fotoUrl: true },
-      }),
-      prisma.postBerita.findMany({
-        where: { status: "Published" },
-        take: 3,
-        orderBy: { publishedAt: "desc" },
-        include: {
-          author: {
-            include: { masterData: { select: { namaLengkap: true } } },
-          },
+  const [
+    welcomeData,
+    visiData,
+    misiData,
+    fasilitas,
+    galeri,
+    berita,
+    landingImages,
+  ] = await Promise.all([
+    prisma.webContent.findUnique({ where: { key: "welcome_text" } }),
+    prisma.webContent.findUnique({ where: { key: "visi" } }),
+    prisma.webContent.findUnique({ where: { key: "misi" } }),
+    prisma.fasilitas.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.gallery.findMany({
+      take: 8,
+      orderBy: { createdAt: "desc" },
+      select: { id: true, judul: true, fotoUrl: true },
+    }),
+    prisma.postBerita.findMany({
+      where: { status: "Published" },
+      take: 3,
+      orderBy: { publishedAt: "desc" },
+      include: {
+        author: {
+          include: { masterData: { select: { namaLengkap: true } } },
         },
-      }),
-    ]);
+      },
+    }),
+    prisma.landingImage.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
+  ]);
 
   const serializeBerita = berita.map((b) => ({
     id: b.id,
@@ -42,12 +50,18 @@ export default async function Home() {
     content: b.content,
   }));
 
+  const heroImage = landingImages.find((i) => i.section === "hero")?.imageUrl;
+  const sambutanImages = landingImages
+    .filter((i) => i.section === "sambutan")
+    .map((i) => i.imageUrl);
+
   return (
     <>
-      <Hero />
+      <Hero bgImage={heroImage} />
       <Welcome
         headline={welcomeData?.value ? "Selamat Datang" : undefined}
         text={welcomeData?.value}
+        images={sambutanImages}
       />
       <VisiMisi visi={visiData?.value} misi={misiData?.value} />
       <UnitSekolah />

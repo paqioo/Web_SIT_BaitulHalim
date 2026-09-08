@@ -121,3 +121,13 @@ model Fasilitas {
 
   @@map("fasilitas")
 }
+
+model LandingImage {
+  id        Int      @id @default(autoincrement())
+  section   String
+  imageUrl  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("landing_images")
+}
