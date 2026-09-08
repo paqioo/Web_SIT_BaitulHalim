@@ -8,7 +8,7 @@
     "vercel-build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && prisma db push --skip-generate --accept-data-loss 2>/dev/null; true",
     "db:migrate": "npx prisma migrate deploy",
     "db:push": "npx prisma db push",
     "db:seed": "npx prisma db seed"

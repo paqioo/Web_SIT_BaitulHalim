@@ -47,9 +47,15 @@ export default async function RootLayout({
     }
   }
 
-  const logo = await prisma.landingImage.findFirst({
-    where: { section: "logo" },
-  });
+  let logoUrl: string | null = null;
+  try {
+    const logo = await prisma.landingImage.findFirst({
+      where: { section: "logo" },
+    });
+    logoUrl = logo?.imageUrl || null;
+  } catch {
+    // fallback jika tabel landing_images belum ada
+  }
 
   return (
     <html
@@ -58,9 +64,9 @@ export default async function RootLayout({
     >
       <body className="flex min-h-[100dvh] flex-col bg-white text-[#1a1a2e]">
         <SessionProvider session={session}>
-          <Header initialSession={session} logo={logo?.imageUrl} />
+          <Header initialSession={session} logo={logoUrl} />
           <main className="flex-1">{children}</main>
-          <Footer logo={logo?.imageUrl} />
+          <Footer logo={logoUrl} />
         </SessionProvider>
       </body>
     </html>

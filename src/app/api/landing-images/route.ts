@@ -7,12 +7,15 @@ export async function GET(req: NextRequest) {
   const section = req.nextUrl.searchParams.get("section");
   const where = section ? { section } : {};
 
-  const items = await prisma.landingImage.findMany({
-    where,
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-
-  return NextResponse.json(items);
+  try {
+    const items = await prisma.landingImage.findMany({
+      where,
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+    return NextResponse.json(items);
+  } catch {
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(req: NextRequest) {
