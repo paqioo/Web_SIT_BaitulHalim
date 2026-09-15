@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { serviceRoleClient as supabase } from "@/lib/supabase";
 import { getSession, createToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
